@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    ul{
+        list-style-type: none;
+    }
+</style>
+    <br>
+    <br>
+    
+	<form class="shadow border rounded p-4 bg-light" method = "post">
+        <table class="table table-stripd table-sm" >
+            <tr>
+                <th scope="col">Date</th>
+                <td scope="col">{{date.date}}</td>
+            </tr>
+        </table>
+        <div class="fs-3">Update Date</div>
+        <br>
+        {% if  form.errors  %}
+            <div class="text-danger">Please Enter Valid Information</div>
+        {% endif %}
+		{% csrf_token %}
+        <div class="mb-3">
+            <label for="date">Date</label>
+            <input  class="form-control" type="date" name="date">
+        </div>
+		<button type="submit" class="btn btn-primary">Submit</button>
+	</form>
+{% endblock %}

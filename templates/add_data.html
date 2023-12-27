@@ -1,0 +1,15 @@
+<form class="shadow border rounded p-4 bg-light" name="createform" onsubmit="return validateForm()" method = "post" enctype="multipart/form-data"> 
+         <h2 class="p-2">Upload Audit Agenda</h2> 
+         <br> 
+         {% if  form.errors  %} 
+             <div class="text-danger">Please Enter Valid Information</div> 
+         {% endif %} 
+                 {% csrf_token %} 
+         {{ form.name }} 
+         <div class="text-danger">{{ form.name.errors }}</div> 
+  
+             <label class="col-form-label">Upload File</label> 
+             <input type="file" name="myfile" class="form-control" required/> 
+         </div> 
+                 <button type="submit" class="btn btn-warning">Submit</button> 
+         </form>

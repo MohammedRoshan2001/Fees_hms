@@ -1,0 +1,199 @@
+{% load static %}
+
+<html>
+<head>
+  <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+
+	<title>{% block title %}HMS_Acoounts{% endblock %}</title>
+	<link rel="stylesheet" href="{% static 'style.css' %}">
+	<link href="{% static 'dashboard.css' %}" rel="stylesheet">
+  <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
+      .line{
+        border-bottom: 5px solid black;
+        margin-top: 5px;
+        width: 90%;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+
+      video {
+          object-fit: cover;
+          width: 100vw;
+          height: 100vh;
+          position: fixed;
+          top: 0;
+          left: 0;
+        }
+    </style>
+	
+</head>
+ 
+<body>
+{% block navbar %}   
+<header class="navbar navbar-dark col-mid-6 sticky-top bg-dark flex-md-nowrap p-0 shadow">
+  <h1 style="align:center; color:white">HMS POLYTECHNIC, TUMAKURU</h1>
+  <h3 style="color:pink; align:center; font-family:cursive;" > it's time to learn from THE BEST </h3> 
+  <img style="height:70px;" src="{% static 'hms_logo.png' %}"/>
+  <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+</header>
+{% endblock %}
+{% block sidebar %}
+
+<div class="container-fluid">
+  <div class="row">
+    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+      <div class="position-sticky pt-3">
+        <ul class="nav flex-column list-group">
+          <li class="nav-item">
+            <a class="nav-link text-dark list-group-item list-group-item-action" aria-current="page" href="{% url 'index' %}">
+              Home
+            </a>
+          </li>
+          {% if user.is_authenticated and user.is_superuser %}
+          <li class="nav-item">
+            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'admin:index' %}">
+              Admin
+            </a>
+          </li>
+          {% endif %}
+          {% if user.is_authenticated and user.is_superuser %}
+          <li class="nav-item">
+            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'add' %}">
+              Add Student
+            </a>
+          </li>
+          {% endif %}
+          {% if user.is_authenticated and user.is_superuser %}
+          <li class="nav-item">
+            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'update_date' %}">
+              Update Date
+            </a>
+          </li>
+          {% endif %}
+          {% if user.is_authenticated and user.is_superuser %}
+          <li class="nav-item">
+            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'fees_updation' %}">
+              Update Fees
+            </a>
+          </li>
+          {% endif %}
+          {% if user.is_authenticated and user.is_superuser %}
+          <li class="nav-item">
+            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'pending_fees' %}">
+              Pending Fees
+            </a>
+          </li>
+          {% endif %}
+          {% if user.is_authenticated and user.is_superuser %}
+          <li class="nav-item">
+            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'history' %}">
+              View DayBook
+            </a>
+          </li>
+          {% endif %}
+          {% if user.is_authenticated and user.is_superuser %}
+          <li class="nav-item">
+            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'day_history' %}">
+              Datewise DayBook
+            </a>
+          </li>
+          {% endif %}
+          {% if user.is_authenticated and user.is_superuser %}
+          <li class="nav-item">
+            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'abstract' %}">
+              Abstract
+            </a>
+          </li>
+          {% endif %}
+          {% if user.is_authenticated and user.is_superuser %}
+          <li class="nav-item">
+            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'update_usn' %}">
+              Update USN
+            </a>
+          </li>
+          {% endif %}
+          {% if user.is_authenticated and user.is_superuser %}
+          <li class="nav-item">
+            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'appln_fee' %}">
+             Add Application Fees
+            </a>
+          </li>
+          {% endif %}
+          {% if user.is_authenticated and user.is_superuser %}
+          <li class="nav-item">
+            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'appln_fee_total' %}">
+              Application Fees Total
+            </a>
+          </li>
+          {% endif %}
+          {% if user.is_authenticated and user.is_superuser %}
+          <li class="nav-item">
+            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'admission_order' %}">
+              Admission Order
+            </a>
+          </li>
+          {% endif %}
+          {% if user.is_authenticated and user.is_superuser %}
+          <li class="nav-item">
+            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'cancelled_admissions' %}">
+              Cancelled Admissions
+            </a>
+          </li>
+          {% endif %}
+          {% if user.is_authenticated and user.is_superuser %}
+          <li class="nav-item">
+            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'sub_category' %}">
+              Sub Categorywise Count
+            </a>
+          </li>
+          {% endif %}
+          
+          {% if not user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'login' %}?next={{request.path}}">
+              LogIn
+            </a>
+          </li>
+          {% endif %}
+          {% if user.is_authenticated  %}
+          <li class="nav-item">
+            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'logout' %}?next={{request.path}}">
+              Logout
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+        <br>
+        <br>
+         <div class="line"></div>
+        <p>Welcome to H.M.S Education Society (R), Tumkur (Karnataka) Hms Polytechnic (Govt. Aided),Minority College (HPA) located at Shettihalli Main Road, Tumkur Tumkur Karnataka is one of the popular colleges in India. The College has been rated by 33 people on iCBSE. The Hms Polytechnic (Govt. Aided),Minority College has been viewed 1062 times by the visitors on iCBSE.</p>
+
+          Source: https://www.icbse.com.</p>
+      </div>
+    </nav>
+    {% endblock %}
+	<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+
+      {% block content %}
+      {% endblock %}
+
+	</main>
+  <script src="{% static 'bootstrap.min.js' %}" ></script>  
+</body>
+</html>

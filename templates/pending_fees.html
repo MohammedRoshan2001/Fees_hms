@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %} 
+{% load accounts_extras %}
+  <div class="shadow border rounded p-4 bg-light"> 
+
+    <hr>
+    <script>  
+          function preventFormSubmission() {
+            var year = document.getElementById('year');
+            var selectedValue = year.value;
+            console.log(year.value);
+            if (selectedValue == '---') {
+              alert('Please select a valid year');
+              return false; 
+            }
+            var dept = document.getElementById('dept');
+            selectedValue = dept.value;
+            if (selectedValue == '---') {
+              alert('Please select a valid dept');
+              return false; 
+            }
+            var academic_year = document.getElementById('academic_year');
+            selectedValue = academic_year.value;
+            if (selectedValue == '---') {
+              alert('Please select a valid Academic year');
+              return false; 
+            }
+      
+            return true; 
+          }
+    
+      
+      </script>
+    <form method="post" onsubmit="return preventFormSubmission();">
+      {% csrf_token %}
+      <table>
+        {{ form.non_field_errors }}
+        <div class="row">
+          <div class="col-3">
+            <label for="exampleFormControlSelect1">Department</label>
+            <select class="form-control" id='dept' name="dept">
+              <option value="---">---</option>
+              <option value="Automobile">Automobile</option>
+              <option value="CS">CS</option>
+              <option value="E and C">E and C</option>
+              <option value="E and E">E and E</option>
+              <option value="Civil">Civil</option>
+              <option value="Mech">Mech</option>
+            </select>
+          </div>
+          <div class="col-3">
+            <label for="exampleFormControlSelect1">Year</label>
+            <select class="form-control" id='year' name="year">
+              <option value="---">---</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+          </div>
+          <div class="col-3">
+            <label for="exampleFormControlSelect1">Academic Year</label>
+            <select class="form-control" id='academic_year' name="academic_year">
+              <option value="---">---</option>
+              {% for i in year_list %}
+              <option value="{{i.academic_year}}">{{i.academic_year}}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-4">
+            <br>
+            <input  class="btn btn-primary" type="submit" value="Search">
+          </div>
+        </div>
+      </table>
+    </form>
+    <br>
+    <br>
+  
+  {% if student_list %}
+  <div class="table-responsive">
+    <button id="downloadexcel" >Download Excel</button>
+    <br><br>
+    <script src="{% static 'table2excel.js' %}"></script>
+    <table>
+    <tr>
+      <th >Department : {{dept}}</th>
+    </tr>
+    <tr>
+      <th >Year : {{year}}</th>
+    </tr>
+    <tr>
+      <th >Academic Year : {{academic_year}}</th>
+    </tr>
+  </table>
+    <table id="example-table" class="table table-striped table-sm">
+      <thead>
+        <tr>
+          <th >Name</th>
+          <th >Reg_no</th>
+            <th >Category</th>
+          <th >Balance</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for file in student_list  %}
+          <tr>
+            <td > <b>{{ file.student.name }} </b></td>
+            <td  >{{ file.student.roll_no2 }}</td>
+            <td  >{{ file.student.category }}</td>
+            <td >{{ file.balance }}</td>
+          {% endfor %}
+          <tr>
+            <td >&nbsp;</td>
+            <td >&nbsp;</td>
+            <td >&nbsp;</td>
+            <td ><b>Grand_Balance</b></td>
+            </tr>
+          <tr>
+            <td >&nbsp;</td>
+            <td >&nbsp;</td>
+            <td >&nbsp;</td>
+            <td ><b>{{balance}}</b></td>
+            </tr>
+      </tbody>
+    </table> 
+  </div>
+  {% else %}
+    <div class="fs-4">No records found</div>
+  {% endif %}
+ <div>
+
+{% endblock %}
+
+<script>
+    document.getElementById('downloadexcel').addEventListener('click',function(){
+    var table2excel = new Table2Excel();
+    table2excel.export(document.querySelectorAll("#example-table"));  });
+</script>

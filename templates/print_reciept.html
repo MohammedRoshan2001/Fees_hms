@@ -1,0 +1,250 @@
+{% load accounts_extras %}
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Fees Receipt</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      width: 600px;
+      margin: 20px auto;
+      border: 1px solid #ccc;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .header h2 {
+      margin: 0;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .logo img {
+      max-width: 150px;
+      height: auto;
+    }
+
+    .details {
+      margin-bottom: 20px;
+    }
+
+    .details p {
+      margin: 5px 0;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table th,
+    .table td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+
+    .table th {
+      background-color: #f2f2f2;
+    }
+
+    .total {
+      margin-top: 20px;
+      text-align: right;
+    }
+
+    .total p {
+      margin: 5px 0;
+    }
+    
+    .container2 {
+      display: flex;
+      align-items: center;
+    }
+
+    .image {
+      flex-basis: 30%;
+    }
+
+    .content {
+      flex-basis: 70%;
+      padding-left: 20px;
+    }
+
+    .content h2 {
+      margin: 0;
+    }
+
+    .content p {
+      margin: 10px 0;
+    }
+
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2 style="color:purple; text-align:center;">HMS EDUCATION SOCIETY(REGD..), TUMKUR</h2>
+      <div class="container2">
+        <div class="image">
+          <a href={% url 'fees_updation' %}>
+            <img src="/static/hms_logo.png" alt="College Logo">
+          </a>
+        </div>
+      <div class="content">
+    
+      <h1 style="color:black;text-align:center; ">H.M.S POLYTECHNIC</h1>
+      <p> (Govt. Aided), Shettihalli Road, TUMKUR - 572 102</p>
+      </div>
+      </div>
+    </div>
+
+   
+
+    <div class="details">
+      <table >
+                
+                    
+        <tr>
+          <td class="tg-0pky"><b>Reciept No:</b></td>
+          <td class="tg-0pky">{{ hist.fees_receipt_no }}</td>
+          <td class="tg-0pky"></td>
+          <td class="tg-0pky"></td>
+          <td class="tg-0pky"></td>
+          <td class="tg-0pky"></td>
+          <td class="tg-0pky"><b>Date:</b></td>
+          <td class="tg-0pky">{{ hist.date }}</td>
+        </tr>
+        <tr>
+          <td class="tg-0pky"><b>Name:</b></td>
+          <td class="tg-0pky">{{ hist.student.name }}</td>
+          <td class="tg-0pky"></td>
+          <td class="tg-0pky"></td>
+          <td class="tg-0pky"></td>
+          <td class="tg-0pky"></td>
+          <td class="tg-0pky"><b>Reg No :</b></td>
+          <td class="tg-0pky">{{  hist.student.roll_no2 }}</td>
+        </tr>
+        <tr>
+          <td class="tg-0pky"><b>Department : </b></td>
+          <td class="tg-0pky">{{ hist.student.dep }}</td>
+          <td class="tg-0pky"></td>
+          <td class="tg-0pky"></td>
+          <td class="tg-0pky"></td>
+          <td class="tg-0pky"></td>
+          <td class="tg-0pky"><b>Year : </b></td>
+          <td class="tg-0pky">{{ hist.year }}</td>
+        </tr>
+        
+    
+      </table>
+    </div>
+
+    <table class="table">
+      <thead>
+        <tr class="center">
+          <th>Sl. No</th>
+          <th>Description</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th class="col-md-3">1</th>
+          <td class="col-md-9">Tution Fee</td>
+          <td class="col-md-3"><i class="fa fa-inr"></i>{{ hist.tution_fees }}</td>
+        </tr>
+        <tr>
+          <th class="col-md-3">2</th>
+          <td class="col-md-9">Admission Fee</td>
+          <td class="col-md-3"><i class="fa fa-inr"></i>{{ hist.admission_fees }}</td>
+        </tr>
+        <tr>
+          <th class="col-md-3">3</th>
+          <td class="col-md-9">ID Card Fee</td>
+          <td class="col-md-3"><i class="fa fa-inr"></i>{{ hist.id_fees }}</td>
+        </tr>
+        <tr>
+          <th class="col-md-3">4</th>
+          <td class="col-md-9">Magazine Fee</td>
+          <td class="col-md-3"><i class="fa fa-inr"></i>{{ hist.management_fees }}</td>
+        </tr>
+        <tr>
+          <th class="col-md-3">5</th>
+          <td class="col-md-9">Library Fee</td>
+          <td class="col-md-3"><i class="fa fa-inr"></i>{{ hist.lib_fees }}</td>
+        </tr>
+          
+
+          <tr>
+            <th class="col-md-3" >6</th>
+            <td class="col-md-9">Association Fee</td>
+            <td class="col-md-3"><i class="fa fa-inr"></i>{{ hist.assn_fees }}</td>
+          </tr>
+          <tr>
+            <th class="col-md-3" >7</th>
+            <td class="col-md-9"> RRR Fee</td>
+            <td class="col-md-3"><i class="fa fa-inr"></i>{{ hist.rr_fees }}</td>
+          </tr>
+          <tr>
+            <th class="col-md-3" >8</th>
+            <td class="col-md-9"> SWF Fee</td>
+            <td class="col-md-3"><i class="fa fa-inr"></i> {{ hist.swf_fees }}</td>
+          </tr>
+          <tr>
+            <th class="col-md-3" >9</th>
+            <td class="col-md-9"> TWF Fee</td>
+            <td class="col-md-3"><i class="fa fa-inr"></i>{{ hist.twf_fees }}</td>
+          </tr>
+          <tr>
+            <th class="col-md-3" >10</th>
+            <td class="col-md-9"> Lab Fee</td>
+            <td class="col-md-3"><i class="fa fa-inr"></i> {{ hist.lab_fees }}</td>
+          </tr>
+          <tr>
+            <th class="col-md-3" >11</th>
+            <td class="col-md-9"> SP Fee</td>
+            <td class="col-md-3"><i class="fa fa-inr"></i>{{ hist.sp_fees }}</td>
+          </tr>
+          <tr>
+            <th class="col-md-3" >12</th>
+            <td class="col-md-9">NSS Fee</td>
+            <td class="col-md-3"><i class="fa fa-inr"></i>{{ hist.nss_fees }}</td>
+          </tr>
+          <tr>
+            <th class="col-md-3" >13</th>
+            <td class="col-md-9"> Development Fee</td>
+            <td class="col-md-3"><i class="fa fa-inr"></i> {{ hist.dev_fees }}</td>
+          </tr>
+          <tr>
+              
+              <td class="text-right"><h4><strong>Total </strong></h4></td>
+              <td class="text-left text-danger"><h4><strong><i class="fa fa-inr">{{ hist|amount_to_words }}</h4></td>
+              <td class="text-left text-danger"><h4><strong><i class="fa fa-inr"></i> {{ hist.total_fees }}</strong></h4></td>
+          </tr>
+
+        <!-- Add more fee types as needed -->
+      </tbody>
+    </table>
+
+    <div class="total">
+      <br>
+      <h3>Cashier/Accountant</h3>
+    </div>
+  </div>
+</body>
+</html>

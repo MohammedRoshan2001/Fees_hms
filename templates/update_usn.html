@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% load static %}
+<style>
+    ul{
+        list-style-type: none;
+    }
+    input, label {
+        display:block;
+    }
+</style>
+
+	<form class="shadow border rounded p-4 bg-light" name="createform" onsubmit="return validateForm()" method = "post" enctype="multipart/form-data">
+        <div class="fs-3">Update Reg No</div>
+        <br>
+  
+  	{% csrf_token %}
+         
+    <div class="mb-3">
+        <label class="form-label" for="usn">Enter Temporary Reg No</label>
+        <input list="usn" name="usn" class="form-control" required>
+        <datalist id="usn">
+            {% for i in student_list %}
+                <option value="{{i.roll_no}}">
+            {% endfor %}
+        </datalist> 
+    </div>
+    <div class="mb-3">
+        <label class="form-label" for="usn2">Permanent Reg No</label>
+        <input type="text" name="usn2" class="form-control" required>
+    </div>
+		<button type="submit" class="btn btn-primary">Submit</button>
+	</form>
+{% endblock %}
+
+        

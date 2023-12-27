@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admission Order</title>
+  <style>
+    body {
+      margin: 0.5;
+      padding: 0.5;
+      font-family: Arial, sans-serif;
+    }
+    table {
+        border-collapse: collapse;
+    }
+    td {
+        border: none;
+        padding: 10px;
+    }
+
+    /* Page size - A4 dimensions */
+    @page {
+      size: A4;
+      margin: 0.5;
+    }
+
+    /* Styling for the first rectangular box */
+    .box1 {
+      width: 100%;
+      height: 200px;
+      border: 2px solid #000;
+      box-sizing: border-box;
+      padding: 10px;
+      text-align: center;
+      font-weight: bold;
+      line-height: 1;
+      display: flex; /* Use Flexbox */
+      justify-content: space-between; /* Align content at the ends */
+      align-items: center; /* Center vertically */
+    }
+
+    /* Styling for the second rectangular box */
+    .box2 {
+      width: 100%;
+      height: 330px; /* Increase the height for more content */
+      border: 2px solid #000;
+      box-sizing: border-box;
+      padding: 10px;
+      text-align: center;
+      font-weight: bold;
+      line-height: 1;
+      display: flex; /* Use Flexbox */
+      justify-content: space-between; /* Align content at the ends */
+      align-items: center; /* Center vertically */
+      margin-top: 0px; /* Remove extra space between the two rectangles */
+      padding-bottom: 50px;
+    }
+
+    
+
+    .left-content {
+      text-align: left;
+      font-size: 12px;
+    }
+
+    .center-content {
+      text-align: left;
+      font-size: 14px;
+    }
+
+    .right-content {
+      text-align: left;
+      font-size: 12px;
+    }
+
+    /* Styling for the underlined text */
+    .underline {
+      text-decoration: underline;
+    }
+
+    /* Styling for myclass content */
+    .myclass {
+      text-align: left;
+      font-size: 12px;
+    }
+
+    /* Styling for the image-sized rectangle box */
+    .image-box {
+      width: 150px;
+      height: 180px;
+      border: 2px solid #000;
+      box-sizing: border-box;
+      margin-right: 40px;
+    }
+  </style>
+</head>
+<body>
+  <!-- First Rectangular Box -->
+  <div class="box1">
+    <div class="left-content">
+      <p>Allotted Polytechnic code: 306</p>
+      <p>Allotted Polytechnic Type: AIDED</p>
+    </div>
+    <div>
+      <p>GOVERNMENT OF KARNATAKA</p>
+      <p>DEPARTMENT OF TECHNICAL EDUCATION</p>
+      <p>H M S POLYTECHNIC</p>
+      <p class="underline">Provisional Admission Letter 2023-24</p>
+    </div>
+    <div class="right-content">
+      <p>COLLEGE COPY</p>
+    </div>
+  </div>
+
+  <!-- Second Rectangular Box -->
+  <div class="box2">
+    <div class="left-content">
+        <table>
+            <tr>
+                <td>Application Number:</td>
+                <td>{{hist.application_number}}</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>Merit No:</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>Category:{{hist.category}}</td>
+                <td>{{ hist.student.dep }}</td>
+            </tr>
+        </table>
+    {% if hist.gender == 'M' %}
+    <p>Mr. {{ hist.name }} S/O {{hist.parent_name}} is allotted for the 1 year</p>
+    {% else %}
+    <p>Mrs. {{ hist.name }} D/O {{hist.parent_name}} is allotted for the 1 year</p>
+    {% endif %}
+
+      <p>Diploma Seat in {{ hist.student.dep }} in the Institute</p>
+      <p>HMS POLYTECHNIC TUMKUR on {{ fees_receipt.date }}</p>
+      <p>Fees paid at the institute are Rs.{{ fees_receipt.total_fees }}/-</p>
+      <table>
+        <tr>
+            
+            <td>Receipt_No: {{ fees_receipt.fees_receipt_no}} </td>
+            <td></td>
+            <td></td>
+            <td>Dated:</td>
+            <td>{{ fees_receipt.date }}</td>
+            <td></td>
+            <td></td>
+            
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    </table>
+    <p> Signature of the Candidate&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Signature of Parent &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Signature of Principal/Nodal Officer
+    </div>
+    
+    <!-- Image-sized Rectangle Box -->
+    <div class="image-box">
+      <img src='{{hist.student_image.url}}'width="100%" height="100%" />
+    </div>
+  </div>
+  
+<hr>
+<hr>
+
+
+
+<!-- First Rectangular Box -->
+<div class="box1">
+    <div class="left-content">
+      <p>Allotted Polytechnic code: 306</p>
+      <p>Allotted Polytechnic Type: AIDED</p>
+    </div>
+    <div>
+      <p>GOVERNMENT OF KARNATAKA</p>
+      <p>DEPARTMENT OF TECHNICAL EDUCATION</p>
+      <p>H M S POLYTECHNIC</p>
+    </div>
+    <div class="right-content">
+      <p>STUDENT COPY</p>
+    </div>
+  </div>
+
+  <!-- Second Rectangular Box -->
+  <div class="box2">
+    <div class="left-content">
+        <table>
+            <tr>
+                <td>Application Number:</td>
+                <td>{{hist.application_number}}</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>Merit No:</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>Category:{{hist.category}}</td>
+                <td>{{ hist.student.dep }}</td>
+            </tr>
+        </table>
+    {% if hist.gender == 'M' %}
+    <p>Mr. {{ hist.name }} S/O {{hist.parent_name}} is allotted for the 1 year</p>
+    {% else %}
+    <p>Mrs. {{ hist.name }} D/O {{hist.parent_name}} is allotted for the 1 year</p>
+    {% endif %}
+
+      <p>Diploma Seat in {{ hist.student.dep }} in the Institute</p>
+      <p>HMS POLYTECHNIC TUMKUR on {{ fees_receipt.date }}</p>
+      <p>Fees paid at the institute are Rs.{{ fees_receipt.total_fees }}/-</p>
+      <table>
+        <tr>
+            
+            <td>Receipt_No: {{ fees_receipt.fees_receipt_no}} </td>
+            <td></td>
+            <td></td>
+            <td>Dated:</td>
+            <td>{{ fees_receipt.date }}</td>
+            <td></td>
+            <td></td>
+            
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    </table>
+    <p> Signature of the Candidate&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Signature of Parent &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Signature of Principal/Nodal Officer
+    </div>
+    
+    <!-- Image-sized Rectangle Box -->
+    <div class="image-box">
+      <img src='{{hist.student_image.url}}'width="100%" height="100%" />
+    </div>
+  </div>
+s
+
+
+</body>
+</html>

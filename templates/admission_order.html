@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %} 
+
+
+
+	<form class="shadow border rounded p-4 bg-light" name="createform" onsubmit="return validateForm()" method = "post" enctype="multipart/form-data">
+        <div class="fs-3">Admission Year</div>
+        <br>
+  
+  	{% csrf_token %}
+        {{ total }}
+         
+    <div class="mb-3">
+      <label class="form-label" for="year">Enter Year</label>
+      <input type="number" name="year" class="form-control" required>
+    </div>
+		<button type="submit" class="btn btn-primary">Submit</button>
+	</form>
+
+
+  <div class="shadow border rounded p-4 bg-light"> 
+  {% if student_list %}
+    <div class="table-responsive">
+      <br><br>
+      <table id="example-table" class="table table-stripd table-sm">
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Reg_No</th>
+            <th scope="col">Admission Order</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for file in student_list %}
+            <tr>
+              <td scope="col">{{ file.name }}</td>
+              <td scope="col">{{ file.roll_no }}</td>
+              <td scope="col">
+                <a class="btn btn-info p-0 m-0" target="_blank" href="{% url 'print_order' roll_no=file.roll_no %}">View Order</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table> 
+    </div>
+  {% else %}
+    <div class="fs-4">There are no files.</div>
+  {% endif %}
+  <div>
+
+{% endblock %}
