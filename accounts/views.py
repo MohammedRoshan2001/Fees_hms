@@ -223,7 +223,7 @@ def update_form(request,roll_no,year):
             year=int(year)
             amount=int(amount)
             context={}
-            if year==1:
+            if year==1 or (year==2 and student.year_completed==0):
                 
                 if fees.collection<1370:
                     if amount>=1370:
@@ -769,4 +769,51 @@ def sub_category(request):
         year_list=Academic_Year.objects.all()
         context={'abst_list':[],'year_list':year_list[::-1]}
         return render(request,'sub_category.html',context)
+    
+class SC_ST_STATS:
+    def __init__(self,name,year,usn,cat,gender):
+        self.name=name 
+        self.year=year 
+        self.usn=usn
+        self.cat=cat
+        if gender=='M':
+            self.gender="Boys"
+        elif gender=='F':
+            self.gender='Girls'
+        else:
+            self.gender=gender
+
+def sc_st_stats(request):
+    year_list=Academic_Year.objects.all()
+    if request.method=='POST':
+        sc_st_list=[]
+        academic_year=request.POST.get('academic_year')
+        m={}
+        for i in Fees_Details.objects.all():
+            if (i.academic_year.academic_year==academic_year and (i.student.category=="SC" or i.student.category=="ST")):
+                if (i.student.category,i.student.gender) in m:
+                    m[(i.student.category,i.student.gender)]+=1 
+                else:
+                    m[(i.student.category,i.student.gender)]=1 
+                sc_st_list.append(SC_ST_STATS(i.student.name,i.year,i.student.roll_no2,i.student.category,i.student.gender))
+        for i in m:
+            sc_st_list.append(SC_ST_STATS("",m[i],"",i[0],i[1]))
+
+        sc_st_list.sort(key=lambda x:(x.cat,x.gender,x.name))
+        for i in sc_st_list:
+            if i.name=="" and i.usn=="":
+                i.name=i.cat 
+                i.usn=i.gender
+        print()
+        for i in sc_st_list:
+            print(i.name,i.cat,i.gender,i.usn,i.year)
+            print()
+        print(m)
+        context={'sc_st_list':sc_st_list,'year_list':year_list[::-1],'academic_year':academic_year}
+        return render(request,'sc_st_stats.html',context)
+    else:
+        sc_st_list=[]
+        context={'sc_st_list':sc_st_list,'year_list':year_list[::-1]}
+        return render(request,'sc_st_stats.html',context)
+    pass
 

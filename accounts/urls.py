@@ -22,5 +22,7 @@ urlpatterns = [
     path('pending_fees',views.pending_fees,name="pending_fees"),
     path('cancelled_admissions',views.cancelled_admissions,name="cancelled_admissions"),
     path('sub_category',views.sub_category,name="sub_category"),
+    path('sc_st_stats',views.sc_st_stats,name="sc_st_stats"),
+    
 
 ]
