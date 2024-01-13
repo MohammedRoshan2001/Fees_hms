@@ -51,9 +51,15 @@
             <td scope="col"><hr></td>
           </tr>
           <tr>
-            <td scope="col"><b>{{ i.name }}</b></td>
-            <td scope="col" ><b>{{ i.usn }}</b></td>
-            <td scope="col" ><b>{{ i.year }}</b></td>
+            <td scope="col" style="color:red"><b>{{ i.name }}</b></td>
+            <td scope="col" style="color:red"><b>{{ i.usn }}</b></td>
+            <td scope="col" style="color:red"><b>{{ i.year }}</b></td>
+          </tr>
+          {% elif i.name == 'Name' %}
+          <tr>
+            <td scope="col" ><b>{{ i.name }}</b></td>
+            <td scope="col"><b>{{ i.usn }}</b></td>
+            <td scope="col"><b>{{ i.year }}</b></td>
           </tr>
           {% else %}
           <tr>

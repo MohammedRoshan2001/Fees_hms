@@ -4,7 +4,7 @@ from django.db import models
 year_choices=((1,1),(2,2),(3,3))
 department_choices=(("Automobile","Automobile"),("CS","CS"),("E and C","E and C"),("E and E","E and E"),("Civil","Civil"),("Mech","Mech"),("Dummy","Dummy"))
 category_choices=(('SC','SC'),('SNQ','SNQ'),('Others','Others'),('ST','ST'))
-sub_category_choices=(('--','--'),('2a','2a'),('2b','2b'),('3a','3a'),('3b','3b'),('cat-1','cat-1'))
+sub_category_choices=(('--','--'),('2a','2a'),('2b','2b'),('3a','3a'),('3b','3b'),('cat-1','cat-1'),('GM','GM'),('SC','SC'),('ST',"ST"))
 class Student(models.Model):
     roll_no=models.CharField(max_length=15,primary_key=True)
     roll_no2=models.CharField(max_length=15,unique=True,null=True)

@@ -21,13 +21,14 @@ from django.template.loader import get_template
 #import render_to_pdf from util.py 
 
 class Abst:
-    def __init__(self,sl_no,dept,year,demand,collection,balance):
+    def __init__(self,sl_no,dept,year,demand,collection,balance,count):
         self.sl_no=sl_no 
         self.dept=dept 
         self.year=year
         self.demand=demand 
         self.collection=collection 
-        self.balance=balance
+        self.balance=balance 
+        self.count=count
 #Creating our view, it is a class based view 
 class Collection:
     def __init__(self,receipt_no,date,fees) -> None:
@@ -112,21 +113,25 @@ def add_student(request):
         year=request.POST.get('year')
         st=Student.objects.get(roll_no2=usn)
         y=int(year)
-        total_fee=-1
-        if st.category=='SNQ':
-                total_fee=1370
-        elif st.year_completed==0:
-            total_fee=6998
-        else:
-            total_fee=6848
-            
-            
-        academic_year1=request.POST.get('academic_year')
-        academic_year=Academic_Year.objects.get(academic_year=academic_year1)
-      
-        fees_obj=Fees_Details(student=st,year=y,academic_year=academic_year,total_fees=total_fee,balance=total_fee)
-        fees_obj.save()
-        return HttpResponseRedirect(reverse('success'))
+        try:
+            st=Fees_Details.objects.get(student=st,year=y)
+            return render(request,'student_exist.html')
+        except:
+            total_fee=-1
+            if st.category=='SNQ':
+                    total_fee=1370
+            elif st.year_completed==0:
+                total_fee=6998
+            else:
+                total_fee=6848
+                
+                
+            academic_year1=request.POST.get('academic_year')
+            academic_year=Academic_Year.objects.get(academic_year=academic_year1)
+        
+            fees_obj=Fees_Details(student=st,year=y,academic_year=academic_year,total_fees=total_fee,balance=total_fee)
+            fees_obj.save()
+            return HttpResponseRedirect(reverse('success'))
     else:
         student_list=Student.objects.all()
         year_list=Academic_Year.objects.all()
@@ -223,7 +228,7 @@ def update_form(request,roll_no,year):
             year=int(year)
             amount=int(amount)
             context={}
-            if year==1 or (year==2 and student.year_completed==0):
+            if year==1 or (year==2 and student.year_completed==0) or student.category=='SNQ':
                 
                 if fees.collection<1370:
                     if amount>=1370:
@@ -268,12 +273,12 @@ def update_form(request,roll_no,year):
              
                     return render(request,'print_reciept.html',context)
             else:
-                if fees.collection<1270:
-                    if amount>=1270:
-                        tution_fees=amount-1270
+                if fees.collection<1220:
+                    if amount>=1220:
+                        tution_fees=amount-1220
                         hist=History(pk=receipt_no,student=student,year=fees.year,academic_year=fees.academic_year.academic_year,tution_fees=tution_fees,
-                                admission_fees=30,id_fees=10,management_fees=60,lib_fees=150,assn_fees=60,
-                                rr_fees=0,swf_fees=25,twf_fees=25,
+                                admission_fees=30,id_fees=10,management_fees=60,lib_fees=0,assn_fees=60,
+                                rr_fees=100,swf_fees=25,twf_fees=25,
                                 lab_fees=300,sp_fees=70,nss_fees=40,dev_fees=500,date=date)
                         hist.total_fees=hist.tution_fees+ hist.admission_fees + hist.id_fees + hist.management_fees + hist.lib_fees + hist.assn_fees + hist.rr_fees + hist.swf_fees + hist.twf_fees + hist.lab_fees+ hist.sp_fees+ hist.nss_fees+ hist.dev_fees
                         hist.save()
@@ -437,22 +442,25 @@ def abstract(request):
                     m[(i.student.dep,i.year)][0]+=i.total_fees 
                     m[(i.student.dep,i.year)][1]+=i.collection 
                     m[(i.student.dep,i.year)][2]+=i.balance 
+                    m[(i.student.dep,i.year)][3]+=1
                 else:
-                    m[(i.student.dep,i.year)]=[i.total_fees,i.collection,i.balance] 
+                    m[(i.student.dep,i.year)]=[i.total_fees,i.collection,i.balance,1] 
         l=[]
         for i in m:
-            l.append([i[0],i[1],m[i][0],m[i][1],m[i][2]])
+            l.append([i[0],i[1],m[i][0],m[i][1],m[i][2],m[i][3]])
         l.sort()
         abst_list=[]
-        c=1
+        c=1 
+        total_students=0
         for i in l:
-            obj=Abst(c,i[0],i[1],i[2],i[3],i[4])
+            obj=Abst(c,i[0],i[1],i[2],i[3],i[4],i[5])
             total+=i[2]
             collection+=i[3]
             balance+=i[4]
+            total_students+=i[5]
             c+=1
             abst_list.append(obj) 
-        abst_list.append(Abst("Total","","",total,collection,balance))
+        abst_list.append(Abst("Total","","",total,collection,balance,total_students))
         year_list=Academic_Year.objects.all()
         context={'abst_list':abst_list,'year_list':year_list[::-1],'total':total,'collection':collection,'balance':balance}
         return render(request,'abstract.html',context)
@@ -463,22 +471,25 @@ def abstract(request):
             if (i.student.dep,i.year) in m:
                     m[(i.student.dep,i.year)][0]+=i.total_fees 
                     m[(i.student.dep,i.year)][1]+=i.collection 
-                    m[(i.student.dep,i.year)][2]+=i.balance 
+                    m[(i.student.dep,i.year)][2]+=i.balance
+                    m[(i.student.dep,i.year)][3]+=1
             else:
-                m[(i.student.dep,i.year)]=[i.total_fees,i.collection,i.balance]
+                m[(i.student.dep,i.year)]=[i.total_fees,i.collection,i.balance,1]
         for i in m:
-            l.append([i[0],i[1],m[i][0],m[i][1],m[i][2]])
+            l.append([i[0],i[1],m[i][0],m[i][1],m[i][2],m[i][3]])
         l.sort()
         abst_list=[]
         c=1
+        total_students=0
         for i in l: 
-            obj=Abst(c,i[0],i[1],i[2],i[3],i[4])
+            obj=Abst(c,i[0],i[1],i[2],i[3],i[4],i[5])
             total+=i[2]
             collection+=i[3]
             balance+=i[4]
+            total_students+=i[5]
             c+=1
             abst_list.append(obj) 
-        abst_list.append(Abst("Total","","",total,collection,balance))
+        abst_list.append(Abst("Total","","",total,collection,balance,total_students))
         year_list=Academic_Year.objects.all()
         context={'abst_list':abst_list,'year_list':year_list[::-1],'total':total,'collection':collection,'balance':balance}
         return render(request,'abstract.html',context)
@@ -791,25 +802,32 @@ def sc_st_stats(request):
         m={}
         for i in Fees_Details.objects.all():
             if (i.academic_year.academic_year==academic_year and (i.student.category=="SC" or i.student.category=="ST")):
-                if (i.student.category,i.student.gender) in m:
-                    m[(i.student.category,i.student.gender)]+=1 
+                if (i.student.category,i.student.gender,i.year) in m:
+                    m[(i.student.category,i.student.gender,i.year)]+=1 
                 else:
-                    m[(i.student.category,i.student.gender)]=1 
+                    m[(i.student.category,i.student.gender,i.year)]=1 
                 sc_st_list.append(SC_ST_STATS(i.student.name,i.year,i.student.roll_no2,i.student.category,i.student.gender))
         for i in m:
-            sc_st_list.append(SC_ST_STATS("",m[i],"",i[0],i[1]))
+            sc_st_list.append(SC_ST_STATS("",i[2],"",i[0],i[1]))
 
-        sc_st_list.sort(key=lambda x:(x.cat,x.gender,x.name))
+        sc_st_list.sort(key=lambda x:(x.cat,x.gender,x.year,x.name))
+        sc_st_list2=[]
         for i in sc_st_list:
             if i.name=="" and i.usn=="":
                 i.name=i.cat 
-                i.usn=i.gender
-        print()
-        for i in sc_st_list:
-            print(i.name,i.cat,i.gender,i.usn,i.year)
-            print()
-        print(m)
-        context={'sc_st_list':sc_st_list,'year_list':year_list[::-1],'academic_year':academic_year}
+                i.usn=i.gender 
+                temp=""
+                if i.gender=='Boys':
+                    temp="M"
+                else:
+                    temp='F'
+                i.year=m[(i.cat,temp,i.year)]
+                sc_st_list2.append(i)
+                sc_st_list2.append(SC_ST_STATS("Name","Year","Reg No","",""))
+            else:
+                sc_st_list2.append(i)
+
+        context={'sc_st_list':sc_st_list2,'year_list':year_list[::-1],'academic_year':academic_year}
         return render(request,'sc_st_stats.html',context)
     else:
         sc_st_list=[]
