@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %} 
+{% load accounts_extras %}
+
+<div class="shadow border rounded p-4 bg-light"> 
+    <hr>
+    <form method="post" id="searchForm">
+        {% csrf_token %}
+        <table>
+            {{ form.non_field_errors }}
+            <div class="col-3">
+                <label for="exampleFormControlSelect1">Academic Year</label>
+                <select class="form-control" name="academic_year" id="academicYearSelect">
+                    <option value="---">---</option>
+                    {% for i in year_list %}
+                        <option value="{{i.academic_year}}">{{i.academic_year}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-4">
+                <br>
+                <input class="btn btn-primary" type="submit" value="Search" onclick="validateForm()">
+            </div>
+        </table>
+    </form>
+    <br><br>
+
+    {% if abst_list %}
+        <div class="table-responsive">
+            <button id="downloadexcel">Download Excel</button>
+            <br><br>
+            <table>
+                <tr>
+                    <th>Academic Year: {{ academic_year }}</th>
+                </tr>
+            </table>
+            <br><br>
+
+            <script src="{% static 'table2excel.js' %}"></script>
+            
+            <!-- Year-wise Summary -->
+            <br><br>
+            <h4>Year-wise Totals</h4>
+            <table id="example-table" class="table table-bordered table-sm">
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th>Total Fees</th>
+                        <th>Total Collection</th>
+                        <th>Total Balance</th>
+                        <th>Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1st Year</td>
+                        <td>{{ first_year_total }}</td>
+                        <td>{{ first_year_collection }}</td>
+                        <td>{{ first_year_balance }}</td>
+                        <td>{{ first_year_count }}</td>  <!-- New Count Column -->
+                    </tr>
+                    <tr>
+                        <td>Lateral</td>
+                        <td>{{ lateral_total }}</td>
+                        <td>{{ lateral_collection }}</td>
+                        <td>{{ lateral_balance }}</td>
+                        <td>{{ lateral_count }}</td>  <!-- New Count Column -->
+                    </tr>
+                    <tr>
+                        <td><strong>1st Year + Lateral</strong></td>
+                        <td><strong>{{ first_year_total|add:lateral_total }}</strong></td>
+                        <td><strong>{{ first_year_collection|add:lateral_collection }}</strong></td>
+                        <td><strong>{{ first_year_balance|add:lateral_balance }}</strong></td>
+                        <td><strong>{{ first_year_count|add:lateral_count }}</strong></td>  <!-- Total Count -->
+                    </tr>
+                    <tr>
+                        <td>2nd Year</td>
+                        <td>{{ second_year_total }}</td>
+                        <td>{{ second_year_collection }}</td>
+                        <td>{{ second_year_balance }}</td>
+                        <td>{{ second_year_count }}</td>  <!-- New Count Column -->
+                    </tr>
+                    <tr>
+                        <td>3rd Year</td>
+                        <td>{{ third_year_total }}</td>
+                        <td>{{ third_year_collection }}</td>
+                        <td>{{ third_year_balance }}</td>
+                        <td>{{ third_year_count }}</td>  <!-- New Count Column -->
+                    </tr>
+                    <tr>
+                        <td><strong>2nd Year + 3rd Year</strong></td>
+                        <td><strong>{{ second_year_total|add:third_year_total }}</strong></td>
+                        <td><strong>{{ second_year_collection|add:third_year_collection }}</strong></td>
+                        <td><strong>{{ second_year_balance|add:third_year_balance }}</strong></td>
+                        <td><strong>{{ second_year_count|add:third_year_count }}</strong></td>  <!-- Total Count -->
+                    </tr>
+                    <tr>
+                        <td><strong>Grand Total</strong></td>
+                        <td><strong>{{ grand_total_fees }}</strong></td>
+                        <td><strong>{{ grand_collection }}</strong></td>
+                        <td><strong>{{ grand_balance }}</strong></td>
+                        <td><strong>{{ first_year_count|add:lateral_count|add:second_year_count|add:third_year_count }}</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="fs-4">No records found</div>
+    {% endif %}
+    
+    <script>
+        function validateForm() {
+            var academicYearSelect = document.getElementById('academicYearSelect');
+            if (academicYearSelect.value === '---') {
+                alert('Please select a valid Academic Year');
+                event.preventDefault(); // Prevent form submission
+            }
+        }
+
+        document.getElementById('downloadexcel').addEventListener('click', function () {
+            var table2excel = new Table2Excel();
+            table2excel.export(document.querySelectorAll("#example-table"));
+        });
+    </script>
+</div>
+{% endblock %}

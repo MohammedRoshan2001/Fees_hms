@@ -2,7 +2,7 @@ from email.policy import default
 from random import choices
 from django.db import models
 year_choices=((1,1),(2,2),(3,3))
-department_choices=(("Automobile","Automobile"),("CS","CS"),("E and C","E and C"),("E and E","E and E"),("Civil","Civil"),("Mech","Mech"),("Dummy","Dummy"))
+department_choices=(("Automobile","Automobile"),("Computer Science","Computer Science"),("E and C","E and C"),("E and E","E and E"),("Civil","Civil"),("Mechanical","Mechanical"),("Dummy","Dummy"))
 category_choices=(('SC','SC'),('SNQ','SNQ'),('Others','Others'),('ST','ST'))
 sub_category_choices=(('--','--'),('2a','2a'),('2b','2b'),('3a','3a'),('3b','3b'),('cat-1','cat-1'),('GM','GM'),('SC','SC'),('ST',"ST"))
 class Student(models.Model):
@@ -21,6 +21,8 @@ class Student(models.Model):
     application_number=models.CharField(max_length=20,default="000000000")
     cancel_admission=models.BooleanField(default=False)
     year_completed=models.IntegerField(default=0)
+    merit_no = models.CharField(max_length=20, default="NA")
+    Is_lateral = models.BooleanField(default=False)
     def __str__(self):
         return self.roll_no2
 
@@ -36,8 +38,9 @@ class Fees_Details(models.Model):
     total_fees=models.IntegerField(default=0)
     collection=models.IntegerField(default=0)
     balance=models.IntegerField(default=0)
+    repeater=models.BooleanField(default= False)
     def __str__(self):
-        return self.student.roll_no+" "+str(self.year)
+        return self.student.roll_no2+" "+str(self.year)
 
 class History(models.Model):
     fees_receipt_no=models.CharField(primary_key=True,max_length=10)

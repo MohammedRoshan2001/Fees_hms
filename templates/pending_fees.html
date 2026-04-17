@@ -29,9 +29,8 @@
       
             return true; 
           }
-    
-      
       </script>
+    
     <form method="post" onsubmit="return preventFormSubmission();">
       {% csrf_token %}
       <table>
@@ -42,11 +41,11 @@
             <select class="form-control" id='dept' name="dept">
               <option value="---">---</option>
               <option value="Automobile">Automobile</option>
-              <option value="CS">CS</option>
+              <option value="Computer Science">Computer Science</option>
               <option value="E and C">E and C</option>
               <option value="E and E">E and E</option>
               <option value="Civil">Civil</option>
-              <option value="Mech">Mech</option>
+              <option value="Mechanical">Mechanical</option>
             </select>
           </div>
           <div class="col-3">
@@ -67,73 +66,101 @@
               {% endfor %}
             </select>
           </div>
+          <br><br><br><br>
+          <div class="row">
+            <div class="col-4">
+              <label>
+                <input type="checkbox" id="alphabetical" name="alphabetical" 
+                       onchange="this.form.submit();" {% if alphabetical %}checked{% endif %}>
+                       
+                       Display Alphabetically
+              </label>
+            </div>
+          </div>
           <div class="col-4">
             <br>
-            <input  class="btn btn-primary" type="submit" value="Search">
+            <input class="btn btn-primary" type="submit" value="Search">
           </div>
         </div>
+        
+        <!-- New checkbox for alphabetical sorting -->
+        
       </table>
     </form>
-    <br>
-    <br>
-  
-  {% if student_list %}
-  <div class="table-responsive">
-    <button id="downloadexcel" >Download Excel</button>
+    
     <br><br>
-    <script src="{% static 'table2excel.js' %}"></script>
-    <table>
-    <tr>
-      <th >Department : {{dept}}</th>
-    </tr>
-    <tr>
-      <th >Year : {{year}}</th>
-    </tr>
-    <tr>
-      <th >Academic Year : {{academic_year}}</th>
-    </tr>
-  </table>
-    <table id="example-table" class="table table-striped table-sm">
-      <thead>
-        <tr>
-          <th >Name</th>
-          <th >Reg_no</th>
-            <th >Category</th>
-          <th >Balance</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for file in student_list  %}
+  
+    {% if student_list %}
+      <div class="table-responsive">
+        <button id="downloadexcel">Download Excel</button>
+        <br><br>
+        <script src="{% static 'table2excel.js' %}"></script>
+        <table>
           <tr>
-            <td > <b>{{ file.student.name }} </b></td>
-            <td  >{{ file.student.roll_no2 }}</td>
-            <td  >{{ file.student.category }}</td>
-            <td >{{ file.balance }}</td>
-          {% endfor %}
+            <th>Academic Year : {{academic_year}}</th>
+          </tr>
+        </table>
+        <table>
           <tr>
-            <td >&nbsp;</td>
-            <td >&nbsp;</td>
-            <td >&nbsp;</td>
-            <td ><b>Grand_Balance</b></td>
+            <th>H M S Polytechnic, Tumkur - Fee Due List</th>
+          </tr>
+          <tr>
+            <th>Department : {{dept}}</th>
+          </tr>
+          <tr>
+            <th>Year : {{year}}</th>
+          </tr>
+          <tr>
+            <th>Academic Year : {{academic_year}}</th>
+          </tr>
+        </table>
+        <table id="example-table" class="table table-striped table-sm">
+          <thead>
+            <tr>
+              <th>SL No</th>
+              <th>Name</th>
+              <th>Reg_no</th>
+              <th>Category</th>
+              <th>Balance</th>
             </tr>
-          <tr>
-            <td >&nbsp;</td>
-            <td >&nbsp;</td>
-            <td >&nbsp;</td>
-            <td ><b>{{balance}}</b></td>
+          </thead>
+          <tbody>
+            {% for file in student_list %}
+              <tr>
+                <td><b>{{ forloop.counter }}</b></td>
+                <td><b>{{ file.student.name }}</b></td>
+                <td>{{ file.student.roll_no2 }}</td>
+                <td>{{ file.student.category }}</td>
+                <td>{{ file.balance }}</td>
+              </tr>
+            {% endfor %}
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td><b>Grand_Balance</b></td>
             </tr>
-      </tbody>
-    </table> 
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td><b>{{balance}}</b></td>
+            </tr>
+          </tbody>
+        </table> 
+      </div>
+    {% else %}
+      <div class="fs-4">No records found</div>
+    {% endif %}
+    
+    <script>
+      document.getElementById('downloadexcel').addEventListener('click', function() {
+        var table2excel = new Table2Excel();
+        table2excel.export(document.querySelectorAll("#example-table"));
+      });
+    </script>
+
   </div>
-  {% else %}
-    <div class="fs-4">No records found</div>
-  {% endif %}
- <div>
-
 {% endblock %}
-
-<script>
-    document.getElementById('downloadexcel').addEventListener('click',function(){
-    var table2excel = new Table2Excel();
-    table2excel.export(document.querySelectorAll("#example-table"));  });
-</script>

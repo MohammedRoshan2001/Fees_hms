@@ -55,7 +55,6 @@ def reciept(request):
 
  
 def add_data(request):
-    print("Hello World 1")
     if request.method == 'POST':
         excel_file = request.FILES["myfile"]
         print(excel_file)
@@ -108,22 +107,34 @@ def updating(request):
 
 
 def index(request):
- 
+    print(len(Fees_Details.objects.all()))
+    print(Fees_Details.objects.filter(student__roll_no='Prajwal'))
+
+    s = {}
+    
+    for i in Fees_Details.objects.all():
+        if i.student.category!= 'SNQ':
+            if i.student.roll_no2 in s and i.total_fees == 6998:
+                i.total_fees = 6848
+                i.save()
+                s[i.student.roll_no2].append((i,i.total_fees))
+            else:
+                s[i.student.roll_no2] = [(i,i.total_fees)]
+    for i in s:
+        if len(s[i])>1:
+            print(s[i])
+    print()
     return render(request, 'base.html')
 
 
 
 def add_student(request):
-    print("Hello world")
     if request.method=="POST":
         usn=request.POST.get('usn')
         year=request.POST.get('year')
         repeater = request.POST.get('repeater')
         print(repeater, type(repeater))
-        print(usn)
-        print(year)
         st=Student.objects.get(roll_no2=usn)
-        print(st)
         y=int(year)
         rep = False
         if repeater == "1":
@@ -147,10 +158,10 @@ def add_student(request):
 
         total_fee=-1
         if st.category=='SNQ':
-                total_fee=1380
+                total_fee=1370
         elif years_completed==0:
             
-            total_fee= 7580
+            total_fee=6998
         else:
             total_fee=6848
             
@@ -443,13 +454,13 @@ def update_form(request,roll_no,year,academic_year):
             context={}
             if year==1 or (year==2 and student.year_completed==0) or student.category=='SNQ':
                 
-                if fees.collection<1380:
-                    if amount>=1380:
-                        tution_fees=amount-1380
+                if fees.collection<1370:
+                    if amount>=1370:
+                        tution_fees=amount-1370
                         hist=History(pk=receipt_no,student=student,year=fees.year,academic_year=fees.academic_year.academic_year,tution_fees=tution_fees,
                                 admission_fees=30,id_fees=10,management_fees=60,lib_fees=150,assn_fees=60,
                                 rr_fees=100,swf_fees=25,twf_fees=25,
-                                lab_fees=300,sp_fees=70,nss_fees=50,dev_fees=500,date=date)
+                                lab_fees=300,sp_fees=70,nss_fees=40,dev_fees=500,date=date)
                         hist.total_fees=hist.tution_fees+ hist.admission_fees + hist.id_fees + hist.management_fees + hist.lib_fees + hist.assn_fees + hist.rr_fees + hist.swf_fees + hist.twf_fees + hist.lab_fees+ hist.sp_fees+ hist.nss_fees+ hist.dev_fees
                         hist.save()
                         fees.collection+=hist.total_fees
@@ -486,13 +497,13 @@ def update_form(request,roll_no,year,academic_year):
              
                     return render(request,'print_reciept.html',context)
             else:
-                if fees.collection<1230:
-                    if amount>=1230:
-                        tution_fees=amount-1230
+                if fees.collection<1220:
+                    if amount>=1220:
+                        tution_fees=amount-1220
                         hist=History(pk=receipt_no,student=student,year=fees.year,academic_year=fees.academic_year.academic_year,tution_fees=tution_fees,
                                 admission_fees=30,id_fees=10,management_fees=60,lib_fees=0,assn_fees=60,
                                 rr_fees=100,swf_fees=25,twf_fees=25,
-                                lab_fees=300,sp_fees=70,nss_fees=50,dev_fees=500,date=date)
+                                lab_fees=300,sp_fees=70,nss_fees=40,dev_fees=500,date=date)
                         hist.total_fees=hist.tution_fees+ hist.admission_fees + hist.id_fees + hist.management_fees + hist.lib_fees + hist.assn_fees + hist.rr_fees + hist.swf_fees + hist.twf_fees + hist.lab_fees+ hist.sp_fees+ hist.nss_fees+ hist.dev_fees
                         hist.save()
                         fees.collection+=hist.total_fees
@@ -1030,7 +1041,7 @@ def from_date_to_date_history(request):
             
     
     context = {
-        'day_list': day_list2,
+        'day_list': day_list,
         'from_date': from_date_str if from_date else '',
         'to_date': to_date_str if to_date else ''
     }

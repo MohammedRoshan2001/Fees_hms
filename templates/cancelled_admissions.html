@@ -54,7 +54,6 @@
           <th >Total_Fees</th>
           <th style="text-align:center;" colspan="3" >Collection</th>
           <th >Balance</th>
-          <th >Update</th>
           <th >History</th>
         </tr>
       </thead>
@@ -70,11 +69,7 @@
             <td >{{ file.student.total_fees }}</td>
             <td style="text-align:center;" colspan="3">{{ file.student.collection }}</td>
             <td >{{ file.student.balance }}</td>
-            {% if file.student|check == 0 %}
-            <td ><p  class="btn btn-success p-0 m-0">Completed<p></td>
-            {% else %}
-            <td ><a href="{% url 'update_form' roll_no=file.student.student.roll_no2 year=file.student.year %}" class="btn btn-info px-0 py-0 mx-0">Update</a></td>
-            {% endif %}
+ 
             <td ><a  class="btn btn-info p-0 m-0" href="{% url 'student_history' roll_no=file.student.student.roll_no year=file.student.year %}">Link<a></td>
               {% if file.history %}
               <tr>
