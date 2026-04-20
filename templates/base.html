@@ -1,239 +1,339 @@
 {% load static %}
-
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-	<title>{% block title %}HMS_Acoounts{% endblock %}</title>
-	<link rel="stylesheet" href="{% static 'style.css' %}">
-	<link href="{% static 'dashboard.css' %}" rel="stylesheet">
-  <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
-    <style>
-      .bd-placeholder-img {
-        font-size: 1.125rem;
-        text-anchor: middle;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        user-select: none;
-      }
-      .line{
-        border-bottom: 5px solid black;
-        margin-top: 5px;
-        width: 90%;
-      }
+<title>{% block title %}HMS Accounts{% endblock %}</title>
 
-      @media (min-width: 768px) {
-        .bd-placeholder-img-lg {
-          font-size: 3.5rem;
-        }
-      }
+<link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
 
-      video {
-          object-fit: cover;
-          width: 100vw;
-          height: 100vh;
-          position: fixed;
-          top: 0;
-          left: 0;
-        }
-    </style>
-	
+<style>
+
+/* =========================
+   GLOBAL
+========================= */
+body {
+    background-color: #f5efd6 !important;
+    color: #3e3e3e;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+}
+
+
+/* =========================
+   NAVBAR (PREMIUM)
+========================= */
+.navbar {
+    background: #1f2327 !important;
+    border-bottom: 3px solid #000; /* 🔥 premium separator */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+.navbar-brand {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.tagline {
+    font-size: 0.8rem;
+    color: #ffb6c1;
+    opacity: 0.9;
+}
+
+
+/* =========================
+   SIDEBAR
+========================= */
+.sidebar {
+    height: calc(100vh - 70px);
+    position: fixed;
+    top: 70px;
+    left: 0;
+    width: 250px;
+    overflow-y: auto;
+
+    background: #f5efd6 !important;
+    border-right: 2px solid #e0dab0;
+}
+
+/* Scrollbar */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+.sidebar::-webkit-scrollbar-thumb {
+    background: #d6d1a5;
+    border-radius: 10px;
+}
+
+/* Sidebar links */
+.sidebar .nav-link {
+    border-radius: 10px;
+    margin: 6px 12px;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    color: #4a3f35 !important;
+    transition: all 0.25s ease;
+}
+
+/* Hover */
+.sidebar .nav-link:hover {
+    background: linear-gradient(135deg, #6f42c1, #8e5cf7);
+    color: #fff !important;
+    transform: translateX(4px);
+}
+
+/* Active */
+.sidebar .nav-link.active {
+    background: linear-gradient(135deg, #6f42c1, #8e5cf7);
+    color: #fff !important;
+    box-shadow: 0 4px 10px rgba(111,66,193,0.3);
+    font-weight: 500;
+}
+.sidebar ul li {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    margin: 0 10px;
+}
+
+
+/* =========================
+   CONTENT AREA
+========================= */
+.content-area {
+    margin-left: 250px;
+    margin-top: 80px;
+    padding: 20px;
+
+    background-color: #f4f6e8 !important;
+}
+
+
+/* =========================
+   FIX BOOTSTRAP BACKGROUND
+========================= */
+.container,
+.row {
+    background-color: transparent !important;
+}
+
+
+/* =========================
+   CARD (GLASS EFFECT)
+========================= */
+.card,
+.bg-light {
+    background: rgba(255,255,255,0.9) !important;
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 16px;
+
+    box-shadow:
+        0 6px 18px rgba(0,0,0,0.08),
+        0 2px 4px rgba(0,0,0,0.05);
+}
+
+
+/* =========================
+   TABLES
+========================= */
+.table {
+    background-color: #ffffff !important;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table thead {
+    background-color: #ecefdc !important;
+}
+
+.table tbody tr:hover {
+    background-color: #f3f5e4;
+}
+
+
+/* =========================
+   FORMS
+========================= */
+.form-control,
+.form-select {
+    background-color: #ffffff !important;
+    border: 1px solid #dcdcc8;
+    border-radius: 10px;
+    padding: 8px 10px;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #6f42c1;
+    box-shadow: 0 0 0 0.1rem rgba(111,66,193,0.2);
+}
+
+
+/* =========================
+   BUTTONS (MODERN)
+========================= */
+.btn-primary {
+    background: linear-gradient(135deg, #6f42c1, #8e5cf7);
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(111,66,193,0.3);
+}
+
+.btn-success { background-color: #198754; }
+.btn-warning { background-color: #ffc107; }
+.btn-danger { background-color: #dc3545; }
+
+
+/* =========================
+   HEADINGS
+========================= */
+h1, h2, h3, h4, h5 {
+    color: #4b3f2f;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+@media (max-width: 768px) {
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        top: 0;
+    }
+
+    .content-area {
+        margin-left: 0;
+        margin-top: 20px;
+    }
+}
+
+</style>
 </head>
- 
+
 <body>
-{% block navbar %}   
-<header class="navbar navbar-dark col-mid-6 sticky-top bg-dark flex-md-nowrap p-0 shadow">
-  <h1 style="align:center; color:white">HMS POLYTECHNIC, TUMAKURU</h1>
-  <h3 style="color:pink; align:center; font-family:cursive;" > it's time to learn from THE BEST </h3> 
-  <img style="height:70px;" src="{% static 'hms_logo.png' %}"/>
-  <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-</header>
-{% endblock %}
-{% block sidebar %}
 
-<div class="container-fluid">
-  <div class="row">
-    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-      <div class="position-sticky pt-3">
-        <ul class="nav flex-column list-group">
-          <li class="nav-item">
-            <a class="nav-link text-dark list-group-item list-group-item-action" aria-current="page" href="{% url 'index' %}">
-              Home
-            </a>
-          </li>
-          {% if user.is_authenticated and user.is_superuser %}
-          <li class="nav-item">
-            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'admin:index' %}">
-              Admin
-            </a>
-          </li>
-          {% endif %}
-          {% if user.is_authenticated and user.is_superuser %}
-          <li class="nav-item">
-            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'add' %}">
-              Add Student
-            </a>
-          </li>
-          {% endif %}
-          {% if user.is_authenticated and user.is_superuser %}
-          <li class="nav-item">
-            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'update_date' %}">
-              Update Date
-            </a>
-          </li>
-          {% endif %}
-          {% if user.is_authenticated and user.is_superuser %}
-          <li class="nav-item">
-            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'fees_updation' %}">
-              Update Fees
-            </a>
-          </li>
-          {% endif %}
-          {% if user.is_authenticated and user.is_superuser %}
-          <li class="nav-item">
-            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'pending_fees' %}">
-              Pending Fees
-            </a>
-          </li>
-          {% endif %}
-          {% if user.is_authenticated and user.is_superuser %}
-          <li class="nav-item">
-            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'history' %}">
-              View DayBook
-            </a>
-          </li>
-          {% endif %}
-          {% if user.is_authenticated and user.is_superuser %}
-          <li class="nav-item">
-            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'from_date_to_date_history' %}">
-              View DayBook in Time range
-            </a>
-          </li>
-          {% endif %}
-          {% if user.is_authenticated and user.is_superuser %}
-          <li class="nav-item">
-            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'day_history' %}">
-              Datewise DayBook
-            </a>
-          </li>
-          {% endif %}
-          {% if user.is_authenticated and user.is_superuser %}
-          <li class="nav-item">
-            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'abstract' %}">
-              Abstract
-            </a>
-          </li>
-          {% endif %}
+<!-- 🔷 NAVBAR -->
+<nav class="navbar navbar-dark fixed-top px-3" style="height:70px;">
+    <img src="{% static 'hms_logo.png' %}" height="45" class="me-2">
 
-          {% if user.is_authenticated and user.is_superuser %}
-          <li class="nav-item">
-            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'abstract2' %}">
-              Abstract2
-            </a>
-          </li>
-          {% endif %}
+    <div>
+        <div class="navbar-brand mb-0">HMS POLYTECHNIC, TUMAKURU</div>
+        <div class="tagline">it's time to learn from THE BEST</div>
+    </div>
 
-          {% if user.is_authenticated and user.is_superuser %}
-          <li class="nav-item">
-            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'update_usn' %}">
-              Update USN
-            </a>
-          </li>
-          {% endif %}
-          {% if user.is_authenticated and user.is_superuser %}
-          <li class="nav-item">
-            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'appln_fee' %}">
-             Add Application Fees
-            </a>
-          </li>
-          {% endif %}
-          {% if user.is_authenticated and user.is_superuser %}
-          <li class="nav-item">
-            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'appln_fee_total' %}">
-              Application Fees Total
-            </a>
-          </li>
-          {% endif %}
-          {% if user.is_authenticated and user.is_superuser %}
-          <li class="nav-item">
-            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'admission_order' %}">
-              Admission Order
-            </a>
-          </li>
-          {% endif %}
-          {% if user.is_authenticated and user.is_superuser %}
-          <li class="nav-item">
-            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'cancelled_admissions' %}">
-              Cancelled Admissions
-            </a>
-          </li>
-          {% endif %}
+    <div class="ms-auto">
+        {% if user.is_authenticated %}
+        <form action="{% url 'logout' %}" method="post" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-light btn-sm">
+                Logout
+            </button>
+        </form>
+        {% else %}
+            <a href="{% url 'login' %}" class="btn btn-outline-light btn-sm">Login</a>
+        {% endif %}
+    </div>
+</nav>
 
-          {% if user.is_authenticated and user.is_superuser %}
-          <li class="nav-item">
-            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'student_details' %}">
-              Student Details
-            </a>
-          </li>
-          {% endif %}
+<!-- 🔷 SIDEBAR -->
+<div class="sidebar" id="sidebar">
+    <ul class="nav flex-column mt-3">
 
-          {% if user.is_authenticated and user.is_superuser %}
-          <li class="nav-item">
-            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'sub_category' %}">
-              Sub Categorywise Count
-            </a>
-          </li>
-          {% endif %}
-          {% if user.is_authenticated and user.is_superuser %}
-          <li class="nav-item">
-            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'sc_st_stats' %}">
-              SC/ST stats
-            </a>
-          </li>
-          {% endif %}
-          
-          {% if user.is_authenticated and user.is_superuser %}
-          <li class="nav-item">
-            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'fees_updation_summary' %}">
-              DCB
-            </a>
-          </li>
-          {% endif %}
+        <li>
+            <a class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}"
+               href="{% url 'index' %}">🏠 Home</a>
+        </li>
 
-          {% if not user.is_authenticated %}
-          <li class="nav-item">
-            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'login' %}?next={{request.path}}">
-              LogIn
-            </a>
-          </li>
-          {% endif %}
-          {% if user.is_authenticated  %}
-          <li class="nav-item">
-            <a class="nav-link text-dark list-group-item list-group-item-action" href="{% url 'logout' %}?next={{request.path}}">
-              Logout
-            </a>
-          </li>
-          {% endif %}
-        </ul>
-        <br>
-        <br>
-         <div class="line"></div>
-        <p>Welcome to H.M.S Education Society (R), Tumkur (Karnataka) Hms Polytechnic (Govt. Aided),Minority College (HPA) located at Shettihalli Main Road, Tumkur Tumkur Karnataka is one of the popular colleges in India. The College has been rated by 33 people on iCBSE. The Hms Polytechnic (Govt. Aided),Minority College has been viewed 1062 times by the visitors on iCBSE.</p>
+        {% if user.is_authenticated and user.is_superuser %}
 
-          Source: https://www.icbse.com.</p>
-      </div>
-    </nav>
+        <li><a class="nav-link {% if request.resolver_match.url_name == 'admin:index' %}active{% endif %}" href="{% url 'admin:index' %}">⚙️ Admin</a></li>
+
+        <li><a class="nav-link {% if request.resolver_match.url_name == 'add' %}active{% endif %}" href="{% url 'add' %}">➕ Add Student</a></li>
+
+        <li><a class="nav-link {% if request.resolver_match.url_name == 'update_date' %}active{% endif %}" href="{% url 'update_date' %}">📅 Update Date</a></li>
+
+        <li><a class="nav-link {% if request.resolver_match.url_name == 'fees_updation' %}active{% endif %}" href="{% url 'fees_updation' %}">💰 Update Fees</a></li>
+
+        <li><a class="nav-link {% if request.resolver_match.url_name == 'pending_fees' %}active{% endif %}" href="{% url 'pending_fees' %}">⏳ Pending Fees</a></li>
+
+        <li><a class="nav-link {% if request.resolver_match.url_name == 'history' %}active{% endif %}" href="{% url 'history' %}">📖 DayBook</a></li>
+
+        <li><a class="nav-link {% if request.resolver_match.url_name == 'from_date_to_date_history' %}active{% endif %}" href="{% url 'from_date_to_date_history' %}">📊 Time Range</a></li>
+
+        <li><a class="nav-link {% if request.resolver_match.url_name == 'day_history' %}active{% endif %}" href="{% url 'day_history' %}">📆 Datewise</a></li>
+
+        <li><a class="nav-link {% if request.resolver_match.url_name == 'abstract' %}active{% endif %}" href="{% url 'abstract' %}">📑 Abstract</a></li>
+
+        <li><a class="nav-link {% if request.resolver_match.url_name == 'abstract2' %}active{% endif %}" href="{% url 'abstract2' %}">📑 Abstract 2</a></li>
+
+        <li><a class="nav-link {% if request.resolver_match.url_name == 'update_usn' %}active{% endif %}" href="{% url 'update_usn' %}">🆔 Update USN</a></li>
+
+        <li><a class="nav-link {% if request.resolver_match.url_name == 'appln_fee' %}active{% endif %}" href="{% url 'appln_fee' %}">📝 Application Fees</a></li>
+
+        <li><a class="nav-link {% if request.resolver_match.url_name == 'appln_fee_total' %}active{% endif %}" href="{% url 'appln_fee_total' %}">📊 Fees Total</a></li>
+
+        <li><a class="nav-link {% if request.resolver_match.url_name == 'admission_order' %}active{% endif %}" href="{% url 'admission_order' %}">📄 Admission Order</a></li>
+
+        <li><a class="nav-link {% if request.resolver_match.url_name == 'cancelled_admissions' %}active{% endif %}" href="{% url 'cancelled_admissions' %}">❌ Cancelled Admissions</a></li>
+
+        <li><a class="nav-link {% if request.resolver_match.url_name == 'student_details' %}active{% endif %}" href="{% url 'student_details' %}">👨‍🎓 Student Details</a></li>
+
+        <li><a class="nav-link {% if request.resolver_match.url_name == 'sub_category' %}active{% endif %}" href="{% url 'sub_category' %}">📊 Sub Category</a></li>
+
+        <li><a class="nav-link {% if request.resolver_match.url_name == 'sc_st_stats' %}active{% endif %}" href="{% url 'sc_st_stats' %}">📈 SC/ST Stats</a></li>
+
+        <li><a class="nav-link {% if request.resolver_match.url_name == 'fees_updation_summary' %}active{% endif %}" href="{% url 'fees_updation_summary' %}">📉 DCB</a></li>
+
+        <li><a class="nav-link {% if request.resolver_match.url_name == 'fees_structure' %}active{% endif %}" href="{% url 'fees_structure' %}">📋 Fees Structure</a></li>
+
+        <li><a class="nav-link {% if request.resolver_match.url_name == 'detention' %}active{% endif %}" href="{% url 'detention' %}">🚫 Detentions</a></li>
+
+        <li><a class="nav-link {% if request.resolver_match.url_name == 'remove_detention' %}active{% endif %}" href="{% url 'remove_detention' %}">✅ Remove Detention</a></li>
+
+        {% endif %}
+
+    </ul>
+</div>
+
+<!-- 🔷 CONTENT -->
+<div class="content-area">
+    {% block content %}
+    <h4>Welcome 👋</h4>
+    <p>Select an option from sidebar</p>
     {% endblock %}
-	<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+</div>
 
-      {% block content %}
-      {% endblock %}
+<script src="{% static 'bootstrap.min.js' %}"></script>
 
-	</main>
-  <script src="{% static 'bootstrap.min.js' %}" ></script>  
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const sidebar = document.getElementById("sidebar");
+
+    const savedScroll = localStorage.getItem("sidebarScroll");
+    if (savedScroll !== null) {
+        sidebar.scrollTop = savedScroll;
+    }
+
+    sidebar.addEventListener("scroll", function () {
+        localStorage.setItem("sidebarScroll", sidebar.scrollTop);
+    });
+
+    const activeLink = document.querySelector(".sidebar .active");
+    if (activeLink) {
+        activeLink.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+    }
+});
+</script>
+
 </body>
 </html>

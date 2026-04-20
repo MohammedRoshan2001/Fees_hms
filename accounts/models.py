@@ -39,8 +39,9 @@ class Fees_Details(models.Model):
     collection=models.IntegerField(default=0)
     balance=models.IntegerField(default=0)
     repeater=models.BooleanField(default= False)
+    is_detained=models.BooleanField(default= False)
     def __str__(self):
-        return self.student.roll_no2+" "+str(self.year)
+        return self.student.roll_no2+"_"+str(self.year)+"_"+self.academic_year.academic_year
 
 class History(models.Model):
     fees_receipt_no=models.CharField(primary_key=True,max_length=10)
@@ -76,6 +77,44 @@ class Date(models.Model):
     date=models.DateField() 
     def __str__(self) -> str:
         return self.name
+    
+class Fees_Structure(models.Model):
+    year=models.IntegerField(default=1,choices=year_choices)
+    academic_year=models.ForeignKey(Academic_Year,on_delete=models.CASCADE)
+    category=models.CharField(max_length=20,choices=category_choices,default="Others")
+    repeater=models.BooleanField(default= False)
+    is_lateral = models.BooleanField(default=False)
+    total_fees=models.IntegerField(default=0)
+    tution_fees=models.IntegerField(default=0)
+    admission_fees=models.IntegerField(default=0)
+    id_fees=models.IntegerField(default=0)
+    management_fees=models.IntegerField(default=0)
+    lib_fees=models.IntegerField(default=0)
+    assn_fees=models.IntegerField(default=0)
+    rr_fees=models.IntegerField(default=0)
+    swf_fees=models.IntegerField(default=0)
+    twf_fees=models.IntegerField(default=0)
+    lab_fees=models.IntegerField(default=0)
+    sp_fees=models.IntegerField(default=0)
+    nss_fees=models.IntegerField(default=0)
+    dev_fees=models.IntegerField(default=0)
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['year', 'academic_year', 'category', 'repeater', 'is_lateral'],
+                name='unique_fee_structure_combination'
+            )
+        ]
+    def __str__(self) -> str:
+        return str(self.year)+'_'+str(self.academic_year.academic_year)+"_"+self.category+'_'+str(self.repeater)+"_"+str(self.is_lateral)
+
+
+class Detentions(models.Model):
+    student=models.ForeignKey(Student,on_delete=models.CASCADE)
+    year=models.IntegerField(default=1,choices=year_choices)
+    academic_year=models.ForeignKey(Academic_Year,on_delete=models.CASCADE)
+    is_detention_removed=models.BooleanField(default=False)
+
     
     
     

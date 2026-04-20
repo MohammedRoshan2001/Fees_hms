@@ -92,7 +92,11 @@
   
     {% if student_list %}
       <div class="table-responsive">
-        <button id="downloadexcel">Download Excel</button>
+            <!-- ✅ DOWNLOAD BUTTON -->
+            <button id="downloadexcel" class="btn btn-success mb-2">
+              Download Excel
+          </button>
+  
         <br><br>
         <script src="{% static 'table2excel.js' %}"></script>
         <table>
@@ -121,6 +125,8 @@
               <th>Name</th>
               <th>Reg_no</th>
               <th>Category</th>
+              <th>Student_Ph_No</th>
+              <th>Parent_Ph_No</th>
               <th>Balance</th>
             </tr>
           </thead>
@@ -131,6 +137,8 @@
                 <td><b>{{ file.student.name }}</b></td>
                 <td>{{ file.student.roll_no2 }}</td>
                 <td>{{ file.student.category }}</td>
+                <td>{{ file.student.student_phone_number}}</td>
+                <td>{{ file.student.parent_phone_number }}</td>
                 <td>{{ file.balance }}</td>
               </tr>
             {% endfor %}
@@ -139,9 +147,13 @@
               <td>&nbsp;</td>
               <td>&nbsp;</td>
               <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
               <td><b>Grand_Balance</b></td>
             </tr>
             <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
               <td>&nbsp;</td>
               <td>&nbsp;</td>
               <td>&nbsp;</td>

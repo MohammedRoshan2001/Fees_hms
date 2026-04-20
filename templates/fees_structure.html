@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <!-- 🔷 HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>
+            📋 Fees Structure 
+            {% if academic_year %}
+                ({{ academic_year.academic_year }})
+            {% endif %}
+        </h4>
+    </div>
+
+    <!-- 🔷 FILTER FORM -->
+    <form method="post" class="row g-2 mb-4">
+        {% csrf_token %}
+    
+        <div class="col-md-4 col-lg-3">
+            <select name="academic_year" class="form-select" required>
+                <option value="">-- Select Academic Year --</option>
+                {% for y in all_years %}
+                    <option value="{{ y.academic_year }}"
+                        {% if academic_year and academic_year.academic_year == y.academic_year %}selected{% endif %}>
+                        {{ y.academic_year }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+    
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">
+                View
+            </button>
+        </div>
+    </form>
+
+    <!-- 🔷 TABLE CARD -->
+    <div class="card p-3">
+
+        {% if fees_structures %}
+
+        <!-- ✅ DOWNLOAD BUTTON -->
+        
+
+        <div class="table-responsive">
+            <button id="downloadexcel" class="btn btn-success mb-3">
+                Download Excel
+           </button>
+
+            <table id="fees-table" class="table table-bordered table-hover table-striped table-sm text-center align-middle">
+                
+                <thead class="table-dark">
+                    <tr>
+                        <th>Year</th>
+                        <th>Category</th>
+                        <th>Repeater</th>
+                        <th>Lateral</th>
+                        <th>Total</th>
+                        <th>Tuition</th>
+                        <th>Admission</th>
+                        <th>ID</th>
+                        <th>Mgmt</th>
+                        <th>Library</th>
+                        <th>Assoc</th>
+                        <th>RR</th>
+                        <th>SWF</th>
+                        <th>TWF</th>
+                        <th>Lab</th>
+                        <th>Sports</th>
+                        <th>NSS</th>
+                        <th>Dev</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for f in fees_structures %}
+                    <tr>
+                        <td>{{ f.year }}</td>
+                        <td>{{ f.category }}</td>
+
+                        <td>
+                            {% if f.repeater %}
+                                <span class="badge bg-warning text-dark">Yes</span>
+                            {% else %}
+                                <span class="badge bg-success">No</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if f.is_lateral %}
+                                <span class="badge bg-info text-dark">Yes</span>
+                            {% else %}
+                                <span class="badge bg-secondary">No</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="fw-bold text-primary" data-type="number">
+                            {{ f.total_fees }}
+                        </td>
+
+                        <td data-type="number">{{ f.tution_fees }}</td>
+                        <td data-type="number">{{ f.admission_fees }}</td>
+                        <td data-type="number">{{ f.id_fees }}</td>
+                        <td data-type="number">{{ f.management_fees }}</td>
+                        <td data-type="number">{{ f.lib_fees }}</td>
+                        <td data-type="number">{{ f.assn_fees }}</td>
+                        <td data-type="number">{{ f.rr_fees }}</td>
+                        <td data-type="number">{{ f.swf_fees }}</td>
+                        <td data-type="number">{{ f.twf_fees }}</td>
+                        <td data-type="number">{{ f.lab_fees }}</td>
+                        <td data-type="number">{{ f.sp_fees }}</td>
+                        <td data-type="number">{{ f.nss_fees }}</td>
+                        <td data-type="number">{{ f.dev_fees }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+            <div class="text-muted text-center py-3">
+                No data available for selected academic year
+            </div>
+        {% endif %}
+
+    </div>
+
+</div>
+
+<!-- ✅ TABLE2EXCEL -->
+<script src="{% static 'table2excel.js' %}"></script>
+
+<script>
+document.getElementById('downloadexcel')?.addEventListener('click', function () {
+
+    var table2excel = new Table2Excel({
+        name: "Fees Structure",
+        filename: "fees_structure_{{ academic_year.academic_year|default:'all' }}",
+        fileext: ".xlsx"
+    });
+
+    table2excel.export(document.querySelectorAll("#fees-table"));
+});
+</script>
+
+{% endblock %}

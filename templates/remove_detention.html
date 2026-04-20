@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="shadow border rounded p-4 bg-light">
+
+    <h4>✅ Remove / Retain Detention</h4>
+    <hr>
+
+    <!-- FILTER -->
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="row g-3">
+
+            <div class="col-md-3">
+                <label>Department</label>
+                <select class="form-control" name="dept">
+                    <option value="">-- Select --</option>
+                    <option value="Automobile">Automobile</option>
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="E and C">E and C</option>
+                    <option value="E and E">E and E</option>
+                    <option value="Civil">Civil</option>
+                    <option value="Mechanical">Mechanical</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label>Year</label>
+                <select class="form-control" name="year">
+                    <option value="">-- Select --</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label>Academic Year</label>
+                <select class="form-control" name="academic_year">
+                    <option value="">-- Select --</option>
+                    {% for i in year_list %}
+                        <option value="{{ i.academic_year }}">{{ i.academic_year }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-3 d-flex align-items-end">
+                <button class="btn btn-primary w-100">Search</button>
+            </div>
+
+        </div>
+    </form>
+
+    <br>
+
+    {% if student_list %}
+    <div class="table-responsive">
+
+        <!-- ✅ DOWNLOAD BUTTON -->
+        <button id="downloadexcel" class="btn btn-success mb-2">
+            Download Excel
+        </button>
+
+        <!-- TABLE -->
+        <table id="detention-table" class="table table-bordered table-striped table-sm text-center">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>SL</th>
+                    <th>Roll No</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th data-exclude="true">Remove</th>
+                    <th data-exclude="true">Retain</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for d in student_list %}
+                <tr id="row-{{ d.student.roll_no2 }}">
+
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ d.student.roll_no2 }}</td>
+                    <td>{{ d.student.name }}</td>
+                    <td>{{ d.student.category }}</td>
+
+                    <!-- REMOVE -->
+                    <td data-exclude="true">
+                        {% if d.is_detention_removed %}
+                            <span class="badge bg-success">Removed</span>
+                        {% else %}
+                            <button class="btn btn-warning btn-sm"
+                                onclick="removeDetention('{{ d.student.roll_no2 }}','{{ d.student.name }}','{{ d.student.dep }}')">
+                                Remove
+                            </button>
+                        {% endif %}
+                    </td>
+
+                    <!-- RETAIN -->
+                    <td data-exclude="true">
+                        <button class="btn btn-danger btn-sm"
+                            onclick="retainDetention('{{ d.student.roll_no2 }}','{{ d.student.name }}','{{ d.student.dep }}')">
+                            Retain
+                        </button>
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+    </div>
+    {% else %}
+        <p>No records found</p>
+    {% endif %}
+
+</div>
+
+<!-- ✅ TABLE2EXCEL -->
+<script src="{% static 'table2excel.js' %}"></script>
+
+<script>
+
+function removeDetention(roll_no, name, dept) {
+
+    const academic_year = "{{ academic_year }}";
+
+    if (!confirm(`Remove detention for ${name} (${roll_no})?`)) return;
+
+    fetch("{% url 'mark_detention_removed' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+            roll_no: roll_no,
+            year: "{{ year }}",
+            academic_year: academic_year
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === "success") {
+            location.reload();
+        } else {
+            alert(data.message);
+        }
+    });
+}
+
+function retainDetention(roll_no, name, dept) {
+
+    const academic_year = "{{ academic_year }}";
+    const year = "{{ year }}";
+
+    const msg = `CONFIRM RETAIN\n\n${name} (${roll_no})`;
+
+    if (!confirm(msg)) return;
+
+    fetch("{% url 'retain_detention' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+            roll_no: roll_no,
+            year: year,
+            academic_year: academic_year
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === "success") {
+            location.reload();
+        } else {
+            alert(data.message);
+        }
+    });
+}
+
+<!-- ✅ EXCEL EXPORT -->
+document.getElementById('downloadexcel').addEventListener('click', function () {
+
+    var table2excel = new Table2Excel({
+        exclude: "[data-exclude]",
+        name: "Detention Remove Retain List",
+        filename: "detention_remove_retain",
+        fileext: ".xlsx"
+    });
+
+    table2excel.export(document.querySelectorAll("#detention-table"));
+});
+
+</script>
+
+{% endblock %}

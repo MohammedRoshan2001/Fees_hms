@@ -25,7 +25,11 @@
     <br/>
   {% if  appln_list %}
     <div class="table-responsive">
-      <button id="downloadexcel">Download Excel</button>
+          <!-- ✅ DOWNLOAD BUTTON -->
+          <button id="downloadexcel" class="btn btn-success mb-2">
+            Download Excel
+        </button>
+
       <br><br>
       <script src="{% static 'table2excel.js' %}"></script>
       <table id="example-table" class="table table-striped table-sm">

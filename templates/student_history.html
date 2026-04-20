@@ -1,68 +1,152 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block content %} 
+{% block content %}
 
-  <div class="shadow border rounded p-4 bg-light"> 
-  {% if student_list %}
+<div class="shadow border rounded p-4 bg-light">
+
+    {% if student_list %}
+
     <div class="table-responsive">
-      <br><br>
-      <table id="example-table" class="table table-stripd table-sm">
-        <thead>
-          <tr>
-            <th scope="col">Date</th>
-            <th scope="col">Receipt_No</th>
-            <th scope="col">Name</th>
-            <th scope="col">Reg_No</th>
-            <th scope="col">Total_Fees</th>
-            <th scope="col">Tution_Fees</th>
-            <th scope="col">Addmn_Fees</th>
-            <th scope="col">ID_Fees</th>
-            <th scope="col">Mag_Fees</th>
-            <th scope="col">Lib_Fees</th>
-            <th scope="col">Assn_Fees</th>
-            <th scope="col">RR_Fees</th>
-            <th scope="col">SWF_Fees</th>
-            <th scope="col">TWF_Fees</th>
-            <th scope="col">Lab_Fees</th>
-            <th scope="col">SP_Fees</th>
-            <th scope="col">NSS_Fees</th>
-            <th scope="col">Dev_Fees</th>
-            <th scope="col">Appn_Fees</th>
-            <th scope="col">Print</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for file in student_list %}
-            <tr>
-              <td scope="col">{{ file.date }}</td>
-              <td scope="col">{{ file.fees_receipt_no }}</td>
-              <td scope="col">{{ file.student.name }}</td>
-              <td scope="col">{{ file.student.roll_no }}</td>
-              <td scope="col">{{ file.total_fees }}</td>
-              <td scope="col">{{ file.tution_fees }}</td>
-              <td scope="col">{{ file.admission_fees }}</td>
-              <td scope="col">{{ file.id_fees }}</td>
-              <td scope="col">{{ file.management_fees }}</td>
-              <td scope="col">{{ file.lib_fees }}</td>
-              <td scope="col">{{ file.assn_fees }}</td>
-              <td scope="col">{{ file.rr_fees }}</td>
-              <td scope="col">{{ file.swf_fees }}</td>
-              <td scope="col">{{ file.twf_fees }}</td>
-              <td scope="col">{{ file.lab_fees }}</td>
-              <td scope="col">{{ file.sp_fees }}</td>
-              <td scope="col">{{ file.nss_fees }}</td>
-              <td scope="col">{{ file.dev_fees }}</td>
-              <td scope="col">{{ file.appn_fees }}</td>
-              <td scope="col"><a  class="btn btn-info p-0 m-0" href="{% url 'print_receipt' receipt_no=file.fees_receipt_no %}">Link<a></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-      </table> 
+        <br><br>
+
+        <table id="example-table" class="table table-striped table-sm">
+
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Receipt No</th>
+                    <th>Name</th>
+                    <th>Reg No</th>
+                    <th>Total Fees</th>
+                    <th>Tution Fees</th>
+                    <th>Addmn Fees</th>
+                    <th>ID Fees</th>
+                    <th>Mag Fees</th>
+                    <th>Lib Fees</th>
+                    <th>Assn Fees</th>
+                    <th>RR Fees</th>
+                    <th>SWF Fees</th>
+                    <th>TWF Fees</th>
+                    <th>Lab Fees</th>
+                    <th>SP Fees</th>
+                    <th>NSS Fees</th>
+                    <th>Dev Fees</th>
+                    <th>Appn Fees</th>
+
+                    <!-- NEW COLUMN -->
+                    <th>Delete</th>
+
+                    <th>Print</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for file in student_list %}
+                <tr id="row-{{ file.fees_receipt_no }}">
+
+                    <td>{{ file.date }}</td>
+                    <td>{{ file.fees_receipt_no }}</td>
+                    <td>{{ file.student.name }}</td>
+                    <td>{{ file.student.roll_no2 }}</td>
+
+                    <td>{{ file.total_fees }}</td>
+                    <td>{{ file.tution_fees }}</td>
+                    <td>{{ file.admission_fees }}</td>
+                    <td>{{ file.id_fees }}</td>
+                    <td>{{ file.management_fees }}</td>
+                    <td>{{ file.lib_fees }}</td>
+                    <td>{{ file.assn_fees }}</td>
+                    <td>{{ file.rr_fees }}</td>
+                    <td>{{ file.swf_fees }}</td>
+                    <td>{{ file.twf_fees }}</td>
+                    <td>{{ file.lab_fees }}</td>
+                    <td>{{ file.sp_fees }}</td>
+                    <td>{{ file.nss_fees }}</td>
+                    <td>{{ file.dev_fees }}</td>
+                    <td>{{ file.appn_fees }}</td>
+
+                    <!-- DELETE BUTTON -->
+                    <td>
+                        <button class="btn btn-danger btn-sm"
+                            onclick="deleteHistory(
+                                '{{ file.fees_receipt_no }}',
+                                '{{ file.student.roll_no2 }}',
+                                '{{ file.year }}'
+                            )">
+                            Delete
+                        </button>
+                    </td>
+
+                    <!-- PRINT -->
+                    <td>
+                        <a class="btn btn-info btn-sm"
+                           href="{% url 'print_receipt' receipt_no=file.fees_receipt_no %}">
+                            Print
+                        </a>
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
     </div>
-  {% else %}
-    <div class="fs-4">There are no files.</div>
-  {% endif %}
- <div>
+
+    {% else %}
+        <div class="fs-5 text-muted">There are no records.</div>
+    {% endif %}
+
+</div>
+
+<!-- ========================= -->
+<!-- DELETE SCRIPT -->
+<!-- ========================= -->
+<script>
+
+function deleteHistory(receipt_no, roll_no, year) {
+
+    const msg = `
+⚠️ CONFIRM DELETE
+
+Receipt No: ${receipt_no}
+Roll No    : ${roll_no}
+Year       : ${year}
+
+This will:
+✔ Remove history record
+✔ Update Fees Details
+`;
+
+    if (!confirm(msg)) return;
+
+    fetch("{% url 'delete_history' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+            receipt_no: receipt_no,
+            roll_no: roll_no,
+            year: year
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success") {
+
+            // Remove row instantly (no reload needed)
+            document.getElementById("row-" + receipt_no).remove();
+
+        } else {
+            alert(data.message);
+        }
+    });
+
+}
+
+</script>
 
 {% endblock %}

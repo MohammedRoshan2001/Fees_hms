@@ -19,12 +19,25 @@ urlpatterns = [
     path('update_date',views.update_date,name="update_date"),
     path('admission_order',views.admission_order,name="admission_order"),
     path('print_order/<str:roll_no>',views.print_order,name="print_order"),
-    path('add_data',views.add_data,name="add_data"),
     path('pending_fees',views.pending_fees,name="pending_fees"),
     path('cancelled_admissions',views.cancelled_admissions,name="cancelled_admissions"),
     path('sub_category',views.sub_category,name="sub_category"),
     path('sc_st_stats',views.sc_st_stats,name="sc_st_stats"),
     path('student_details',views.student_details,name="student_details"),
     path('fees_updation_summary',views.fees_updation_summary,name="fees_updation_summary"),
-    path('abstract2',views.abstract2,name="abstract2")
+    path('abstract2',views.abstract2,name="abstract2"),
+    path('fees-structure/', views.fees_structure_view, name='fees_structure'),
+    path('detention/', views.detention_view, name='detention'),
+    path('add-detention/', views.add_detention, name='add_detention'),
+    path('remove-detention/', views.remove_detention_view, name='remove_detention'),
+    path('mark-detention-removed/', views.mark_detention_removed, name='mark_detention_removed'),
+    # urls.py
+    path('export-fees/', views.export_fees_excel, name='export_fees_excel'),
+    path('export-history-excel/', views.export_history_excel, name='export_history_excel'),
+    path('from_date_to_date_history_excel',views.from_date_to_date_history_excel,name="from_date_to_date_history_excel"),
+    path('day_history_excel', views.day_history_excel, name="day_history_excel"),
+    path('retain-detention/', views.retain_detention_view, name='retain_detention'),
+    path('delete-history/', views.delete_history, name='delete_history'),
+    path('export_students_excel/', views.export_students_excel, name='export_students_excel'),
 ]
+
