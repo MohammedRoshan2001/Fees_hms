@@ -62,6 +62,7 @@ class History(models.Model):
     sp_fees=models.IntegerField(default=0)
     nss_fees=models.IntegerField(default=0)
     dev_fees=models.IntegerField(default=0)
+    red_cross_fees = models.IntegerField(default=0)
     date=models.DateField()
     def __str__(self):
         return str(self.fees_receipt_no)
@@ -98,6 +99,7 @@ class Fees_Structure(models.Model):
     sp_fees=models.IntegerField(default=0)
     nss_fees=models.IntegerField(default=0)
     dev_fees=models.IntegerField(default=0)
+    red_cross_fees = models.IntegerField(default=0)
     class Meta:
         constraints = [
             models.UniqueConstraint(

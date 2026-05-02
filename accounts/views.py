@@ -396,7 +396,7 @@ def fees_updation_summary(request):
     fees_qs = Fees_Details.objects.select_related(
         'student', 'academic_year'
     ).filter(
-        student__cancel_admission=False
+        student__cancel_admission=False,is_detained=False
     ).exclude(year=0)
 
     # ✅ FILTERS
@@ -603,22 +603,31 @@ def export_fees_excel(request):
     wb.save(response)
     return response
 
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+
 @login_required
-def update_form(request,roll_no,year,academic_year):
+def update_form(request, roll_no, year, academic_year):
     if not request.user.is_superuser:
         return HttpResponse("<h1>Permission denied!!</h1>")
-    student=Student.objects.get(roll_no2=roll_no)
-    fees=Fees_Details.objects.get(student=student,year=year,academic_year=academic_year)
-    if request.method=='POST':
-        roll_no=request.POST.get('roll_no')
-        year=request.POST.get('year')
-        amount=request.POST.get('amount')
-        receipt_no=request.POST.get('receipt_no')
-        receipt_no=int(receipt_no)
-        date=Date.objects.get(pk="1").date
+
+    student = get_object_or_404(Student, roll_no2=roll_no)
+    fees = get_object_or_404(Fees_Details, student=student, year=year, academic_year=academic_year)
+
+    if request.method == 'POST':
+        try:
+            year = int(request.POST.get('year'))
+            amount = int(request.POST.get('amount'))
+            receipt_no = request.POST.get('receipt_no')
+            date = Date.objects.get(pk="1").date
+        except:
+            return HttpResponse("<h1>Invalid input</h1>")
+
+        # ✅ Get Fees Structure
         try:
             fees_structure = Fees_Structure.objects.get(
-                year=int(year),
+                year=year,
                 academic_year=academic_year,
                 category=student.category,
                 repeater=fees.repeater,
@@ -631,80 +640,127 @@ def update_form(request,roll_no,year,academic_year):
                 f"Category: {student.category}, Repeater: {fees.repeater}, "
                 f"Is Lateral: {student.Is_lateral}</h1>"
             )
-        try:
-            hist = History.objects.get(pk=receipt_no)
-            return render(request,'fee_reciept_exist.html')
-        except:
-            year=int(year)
-            amount=int(amount)
-            threshold = sum([
-                fees_structure.admission_fees,
-                fees_structure.id_fees,
-                fees_structure.management_fees,
-                fees_structure.lib_fees,
-                fees_structure.assn_fees,
-                fees_structure.rr_fees,
-                fees_structure.swf_fees,
-                fees_structure.twf_fees,
-                fees_structure.lab_fees,
-                fees_structure.sp_fees,
-                fees_structure.nss_fees,
-                fees_structure.dev_fees
+
+        # ❌ Check duplicate receipt
+        if History.objects.filter(pk=receipt_no).exists():
+            return render(request, 'fee_reciept_exist.html')
+
+        # ✅ Calculate threshold (NON-TUITION FEES)
+        threshold = sum([
+            fees_structure.admission_fees,
+            fees_structure.id_fees,
+            fees_structure.management_fees,
+            fees_structure.lib_fees,
+            fees_structure.assn_fees,
+            fees_structure.rr_fees,
+            fees_structure.swf_fees,
+            fees_structure.twf_fees,
+            fees_structure.lab_fees,
+            fees_structure.sp_fees,
+            fees_structure.nss_fees,
+            fees_structure.dev_fees,
+            fees_structure.red_cross_fees   # ✅ added
+        ])
+
+        # ✅ Helper to calculate total
+        def calculate_total(hist):
+            return sum([
+                hist.tution_fees,
+                hist.admission_fees,
+                hist.id_fees,
+                hist.management_fees,
+                hist.lib_fees,
+                hist.assn_fees,
+                hist.rr_fees,
+                hist.swf_fees,
+                hist.twf_fees,
+                hist.lab_fees,
+                hist.sp_fees,
+                hist.nss_fees,
+                hist.dev_fees,
+                hist.red_cross_fees   # ✅ added
             ])
-            context={}
-                
-            if fees.collection<threshold:
-                if amount>=threshold:
-                    tution_fees=amount-threshold
-                    hist=History(pk=receipt_no,student=student,year=fees.year,academic_year=fees.academic_year.academic_year,tution_fees=tution_fees,
-                            admission_fees=fees_structure.admission_fees,id_fees=fees_structure.id_fees,management_fees=fees_structure.management_fees,lib_fees=fees_structure.lib_fees,assn_fees=fees_structure.assn_fees,
-                            rr_fees=fees_structure.rr_fees,swf_fees=fees_structure.swf_fees,twf_fees=fees_structure.twf_fees,
-                            lab_fees=fees_structure.lab_fees,sp_fees=fees_structure.sp_fees,nss_fees=fees_structure.nss_fees,dev_fees=fees_structure.dev_fees,date=date)
-                    hist.total_fees=hist.tution_fees+ hist.admission_fees + hist.id_fees + hist.management_fees + hist.lib_fees + hist.assn_fees + hist.rr_fees + hist.swf_fees + hist.twf_fees + hist.lab_fees+ hist.sp_fees+ hist.nss_fees+ hist.dev_fees
-                    hist.save()
-                    fees.collection+=hist.total_fees
-                    fees.balance=fees.total_fees-fees.collection
-                    fees.save()
-                    if fees.balance==0:
-                        fees.student.year_completed+=1
-                        fees.student.save()
-                    context['hist']=hist
-                    return render(request,'print_reciept.html',context)
-                else:
-                    hist=History(fees_receipt_no=receipt_no,student=student,year=fees.year,academic_year=fees.academic_year.academic_year,tution_fees=amount,date=date)
-                    hist.total_fees=hist.tution_fees+ hist.admission_fees + hist.id_fees + hist.management_fees + hist.lib_fees + hist.assn_fees + hist.rr_fees + hist.swf_fees + hist.twf_fees + hist.lab_fees+ hist.sp_fees+ hist.nss_fees+ hist.dev_fees
-                    hist.save()
-                    fees.collection+=hist.total_fees
-                    fees.balance=fees.total_fees-fees.collection
-                    fees.save()
-                    if fees.balance==0:
-                        fees.student.year_completed+=1
-                        fees.student.save()
-                    context['hist']=hist
-                    return render(request,'print_reciept.html',context)
-            else:
-                hist=History(fees_receipt_no=receipt_no,student=student,year=fees.year,academic_year=fees.academic_year.academic_year,tution_fees=amount,date=date)
-                hist.total_fees=hist.tution_fees+ hist.admission_fees + hist.id_fees + hist.management_fees + hist.lib_fees + hist.assn_fees + hist.rr_fees + hist.swf_fees + hist.twf_fees + hist.lab_fees+ hist.sp_fees+ hist.nss_fees+ hist.dev_fees
-                hist.save()
-                fees.collection+=hist.total_fees
-                fees.balance=fees.total_fees-fees.collection
-                fees.save()
-                if fees.balance==0:
-                    fees.student.year_completed+=1
-                    fees.student.save()
-                context['hist']=hist
-            
-                return render(request,'print_reciept.html',context)         
-    else:            
-        context={
-            'roll_no':roll_no,
-            'year':year,
-            'fees':fees,
-            'student':student,
-            'date':Date.objects.get(pk="1")
+
+        # ✅ Initialize all fees as 0
+        fee_data = {
+            "tution_fees": 0,
+            "admission_fees": 0,
+            "id_fees": 0,
+            "management_fees": 0,
+            "lib_fees": 0,
+            "assn_fees": 0,
+            "rr_fees": 0,
+            "swf_fees": 0,
+            "twf_fees": 0,
+            "lab_fees": 0,
+            "sp_fees": 0,
+            "nss_fees": 0,
+            "dev_fees": 0,
+            "red_cross_fees": 0
         }
-        return render(request,'update_form.html',context)
-       
+
+        # ✅ Logic
+        if fees.collection < threshold:
+            if amount >= threshold:
+                # Pay all non-tuition + remaining tuition
+                fee_data.update({
+                    "tution_fees": amount - threshold,
+                    "admission_fees": fees_structure.admission_fees,
+                    "id_fees": fees_structure.id_fees,
+                    "management_fees": fees_structure.management_fees,
+                    "lib_fees": fees_structure.lib_fees,
+                    "assn_fees": fees_structure.assn_fees,
+                    "rr_fees": fees_structure.rr_fees,
+                    "swf_fees": fees_structure.swf_fees,
+                    "twf_fees": fees_structure.twf_fees,
+                    "lab_fees": fees_structure.lab_fees,
+                    "sp_fees": fees_structure.sp_fees,
+                    "nss_fees": fees_structure.nss_fees,
+                    "dev_fees": fees_structure.dev_fees,
+                    "red_cross_fees": fees_structure.red_cross_fees
+                })
+            else:
+                # Partial payment → goes to tuition only
+                fee_data["tution_fees"] = amount
+        else:
+            # Already crossed threshold → all goes to tuition
+            fee_data["tution_fees"] = amount
+
+        # ✅ Create History
+        hist = History.objects.create(
+            fees_receipt_no=receipt_no,
+            student=student,
+            year=fees.year,
+            academic_year=fees.academic_year.academic_year,
+            date=date,
+            **fee_data
+        )
+
+        # ✅ Calculate total
+        hist.total_fees = calculate_total(hist)
+        hist.save()
+
+        # ✅ Update Fees_Details
+        fees.collection += hist.total_fees
+        fees.balance = fees.total_fees - fees.collection
+        fees.save()
+
+        # ✅ Promote year if paid fully
+        if fees.balance == 0:
+            student.year_completed += 1
+            student.save()
+
+        return render(request, 'print_reciept.html', {'hist': hist})
+
+    # ✅ GET request
+    context = {
+        'roll_no': roll_no,
+        'year': year,
+        'fees': fees,
+        'student': student,
+        'date': Date.objects.get(pk="1")
+    }
+    return render(request, 'update_form.html', context)  
     
        
     
@@ -717,13 +773,13 @@ def success(request):
 FIELDS = [
     'tution_fees','admission_fees','id_fees','management_fees',
     'lib_fees','assn_fees','rr_fees','swf_fees','twf_fees',
-    'lab_fees','sp_fees','nss_fees','dev_fees','total_fees'
+    'lab_fees','sp_fees','nss_fees','dev_fees','red_cross_fees','total_fees'
 ]
 
+from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
 
-# =========================
-# ✅ DAY HISTORY VIEW
-# =========================
 @login_required
 def day_history(request):
 
@@ -732,24 +788,39 @@ def day_history(request):
 
     qs = History.objects.all().order_by('date', 'fees_receipt_no')
 
+    # ✅ Filter
     if from_date and to_date:
         qs = qs.filter(date__range=[from_date, to_date])
 
-    # ✅ -------- GRAND TOTAL (FULL DATA, NOT PAGINATED) --------
+    # =========================
+    # ✅ GRAND TOTAL (FULL DATA)
+    # =========================
+    FIELDS = [
+        'tution_fees','admission_fees','id_fees','management_fees',
+        'lib_fees','assn_fees','rr_fees','swf_fees','twf_fees',
+        'lab_fees','sp_fees','nss_fees','dev_fees',
+        'red_cross_fees',   # ✅ added
+        'total_fees'
+    ]
+
     grand_totals = {k: 0 for k in FIELDS}
 
     for obj in qs:
         for key in FIELDS:
             grand_totals[key] += getattr(obj, key) or 0
 
-    # ✅ -------- PAGINATION --------
+    # =========================
+    # ✅ PAGINATION
+    # =========================
     paginator = Paginator(qs, 300)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     page_list = list(page_obj)
 
-    # ✅ -------- GROUPING --------
+    # =========================
+    # ✅ GROUPING (BY DATE)
+    # =========================
     final_list = []
 
     if page_list:
@@ -761,6 +832,7 @@ def day_history(request):
 
         for obj in page_list:
 
+            # 👉 DATE CHANGE
             if obj.date != current_date:
                 final_list.append(History(
                     fees_receipt_no=f"{min_fees_no}-{max_fees_no}",
@@ -777,16 +849,20 @@ def day_history(request):
             else:
                 max_fees_no = obj.fees_receipt_no
 
+            # accumulate
             for key in FIELDS:
                 totals[key] += getattr(obj, key) or 0
 
-        # last group
+        # 👉 LAST GROUP
         final_list.append(History(
             fees_receipt_no=f"{min_fees_no}-{max_fees_no}",
             date=current_date,
             **totals
         ))
 
+    # =========================
+    # ✅ CONTEXT
+    # =========================
     context = {
         'day_list': final_list,
         'page_obj': page_obj,
@@ -797,9 +873,8 @@ def day_history(request):
 
     return render(request, 'day_history.html', context)
 
-
 # =========================
-# ✅ EXCEL EXPORT
+# ✅ DAY HISTORY VIEW
 # =========================
 @login_required
 def day_history_excel(request):
@@ -819,11 +894,10 @@ def day_history_excel(request):
 
     headers = [
         'Date','Receipt Range','Total','Tution','Admission','ID',
-        'Management','Library','Assn','RR','SWF','TWF','Lab','SP','NSS','Dev'
+        'Management','Library','Assn','RR','SWF','TWF','Lab','SP','NSS','Dev','RedCross'
     ]
     ws.append(headers)
 
-    # ✅ GRAND TOTAL INIT
     grand_totals = {k: 0 for k in FIELDS}
 
     if qs:
@@ -853,9 +927,9 @@ def day_history_excel(request):
                     totals['sp_fees'],
                     totals['nss_fees'],
                     totals['dev_fees'],
+                    totals['red_cross_fees'],   # ✅ added
                 ])
 
-                # reset
                 min_fees_no = obj.fees_receipt_no
                 max_fees_no = obj.fees_receipt_no
                 totals = {k: 0 for k in FIELDS}
@@ -867,9 +941,8 @@ def day_history_excel(request):
             for key in FIELDS:
                 value = getattr(obj, key) or 0
                 totals[key] += value
-                grand_totals[key] += value   # ✅ accumulate
+                grand_totals[key] += value
 
-        # last row
         ws.append([
             current_date,
             f"{min_fees_no}-{max_fees_no}",
@@ -887,12 +960,11 @@ def day_history_excel(request):
             totals['sp_fees'],
             totals['nss_fees'],
             totals['dev_fees'],
+            totals['red_cross_fees'],   # ✅ added
         ])
 
-    # ✅ EMPTY ROW
     ws.append([])
 
-    # ✅ GRAND TOTAL ROW
     ws.append([
         'GRAND TOTAL',
         '',
@@ -910,13 +982,14 @@ def day_history_excel(request):
         grand_totals['sp_fees'],
         grand_totals['nss_fees'],
         grand_totals['dev_fees'],
+        grand_totals['red_cross_fees'],   # ✅ added
     ])
 
     response = HttpResponse(
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
-    timestamp = datetime.now().strftime("%d-%m-%Y---%H-%M-%S")
 
+    timestamp = datetime.now().strftime("%d-%m-%Y---%H-%M-%S")
     filename = f"day_history__{timestamp}.xlsx"
 
     response['Content-Disposition'] = f'attachment; filename={filename}'
@@ -924,9 +997,6 @@ def day_history_excel(request):
     wb.save(response)
     return response
 
-
-    wb.save(response)
-    return response
 @login_required
 def student_history(request,roll_no,year):
     y=int(year)
@@ -1137,7 +1207,7 @@ def empty_row():
                                 admission_fees= '  ',id_fees= '  ',management_fees=' ',lib_fees=' ',assn_fees=' ',
                                 rr_fees=' ',swf_fees=' ',twf_fees=' ',
                                 lab_fees=' ',sp_fees=' ',nss_fees=' ',dev_fees=' '
-                                ,date= '  ',total_fees=" ")
+                                ,date= '  ',red_cross_fees=' ',total_fees=" ")
 
 @login_required
 def history(request):
@@ -1168,6 +1238,7 @@ def history(request):
         'sp_fees': 0,
         'nss_fees': 0,
         'dev_fees': 0,
+        'red_cross_fees' : 0,
         'total_fees': 0,
     }
 
@@ -1201,6 +1272,7 @@ def history(request):
             'lab_fees': obj.lab_fees or 0,
             'sp_fees': obj.sp_fees or 0,
             'nss_fees': obj.nss_fees or 0,
+            'red_cross_fees' : obj.red_cross_fees or 0,
             'dev_fees': obj.dev_fees or 0,
             'total_fees': obj.total_fees or 0,
         }
@@ -1251,6 +1323,7 @@ def history(request):
     return render(request, 'history.html', context)
 
 
+
 @login_required
 def export_history_excel(request):
 
@@ -1267,21 +1340,24 @@ def export_history_excel(request):
     ws = wb.active
     ws.title = "History"
 
+    # =========================
+    # HEADERS
+    # =========================
     headers = [
         "Date", "Receipt_No", "Name", "Reg_No", "Total",
         "Tution", "Admission", "ID", "Mgmt",
         "Lib", "Assn", "RR", "SWF", "TWF",
-        "Lab", "SP", "NSS", "Dev"
+        "Lab", "SP", "NSS", "Dev", "RedCross"
     ]
     ws.append(headers)
 
     # =========================
-    # TOTAL STRUCTURE
+    # FIELDS
     # =========================
     FIELDS = [
         'tution_fees','admission_fees','id_fees','management_fees',
         'lib_fees','assn_fees','rr_fees','swf_fees','twf_fees',
-        'lab_fees','sp_fees','nss_fees','dev_fees','total_fees'
+        'lab_fees','sp_fees','nss_fees','dev_fees','red_cross_fees','total_fees'
     ]
 
     def reset_totals():
@@ -1291,15 +1367,13 @@ def export_history_excel(request):
     totals = reset_totals()
 
     # =========================
-    # GRAND TOTAL (FIXED)
+    # GRAND TOTAL
     # =========================
     grand_totals = reset_totals()
 
     for i in qs:
 
-        # =========================
-        # FIXED: GRAND TOTAL ALWAYS UPDATED
-        # =========================
+        # ✅ GRAND TOTAL UPDATE
         for k in grand_totals:
             grand_totals[k] += getattr(i, k) or 0
 
@@ -1338,9 +1412,10 @@ def export_history_excel(request):
                 totals['sp_fees'],
                 totals['nss_fees'],
                 totals['dev_fees'],
+                totals['red_cross_fees'],
             ])
 
-            ws.append([""] * 18)
+            ws.append([""] * 19)
 
             totals = reset_totals()
             for k in totals:
@@ -1370,6 +1445,7 @@ def export_history_excel(request):
             i.sp_fees,
             i.nss_fees,
             i.dev_fees,
+            i.red_cross_fees,
         ])
 
     # =========================
@@ -1392,6 +1468,7 @@ def export_history_excel(request):
             totals['sp_fees'],
             totals['nss_fees'],
             totals['dev_fees'],
+            totals['red_cross_fees'],
         ])
 
     # =========================
@@ -1414,10 +1491,11 @@ def export_history_excel(request):
         grand_totals['sp_fees'],
         grand_totals['nss_fees'],
         grand_totals['dev_fees'],
+        grand_totals['red_cross_fees'],
     ])
 
     # =========================
-    # FILE NAME (IST TIMESTAMP)
+    # FILE NAME
     # =========================
     timestamp = datetime.now().strftime("%d-%m-%Y---%H-%M-%S")
     filename = f"academic_year_history__{timestamp}.xlsx"
@@ -1454,7 +1532,7 @@ def from_date_to_date_history(request):
 
             history_qs = history_qs.filter(date__range=[from_date, to_date])
 
-    # ✅ -------- GRAND TOTAL (FULL FILTERED DATA) --------
+    # ✅ GRAND TOTAL
     grand_totals = {k: 0 for k in FIELDS}
 
     for obj in history_qs:
@@ -1468,18 +1546,15 @@ def from_date_to_date_history(request):
 
     page_list = list(page_obj)
 
-    # ✅ DISPLAY LIST (with daily totals)
     final_list = []
 
     if page_list:
         current_date = page_list[0].date
-
         totals = {k: 0 for k in FIELDS}
 
         for obj in page_list:
 
             if obj.date != current_date:
-                # 👉 total row
                 final_list.append(History(
                     fees_receipt_no='Total',
                     student=None,
@@ -1487,19 +1562,16 @@ def from_date_to_date_history(request):
                     **totals
                 ))
 
-                # 👉 empty row
                 final_list.append(empty_row())
 
                 totals = {k: 0 for k in FIELDS}
                 current_date = obj.date
 
-            # accumulate
             for key in FIELDS:
                 totals[key] += getattr(obj, key) or 0
 
             final_list.append(obj)
 
-        # last total
         final_list.append(History(
             fees_receipt_no='Total',
             student=None,
@@ -1512,12 +1584,11 @@ def from_date_to_date_history(request):
         'page_obj': page_obj,
         'from_date': request.POST.get('from_date', ''),
         'to_date': request.POST.get('to_date', ''),
-        'grand_totals': grand_totals   # ✅ ADD
+        'grand_totals': grand_totals
     }
+    print(grand_totals)
 
     return render(request, 'from_date_to_date_history.html', context)
-
-
 # =========================
 # ✅ EXCEL EXPORT
 # =========================
@@ -1541,11 +1612,10 @@ def from_date_to_date_history_excel(request):
     headers = [
         'Date','Receipt','Name','Reg No','Total',
         'Tution','Admission','ID','Management','Library',
-        'Assn','RR','SWF','TWF','Lab','SP','NSS','Dev'
+        'Assn','RR','SWF','TWF','Lab','SP','NSS','Dev','RedCross'
     ]
     ws.append(headers)
 
-    # ✅ GRAND TOTAL INIT
     grand_totals = {k: 0 for k in FIELDS}
 
     if qs:
@@ -1554,7 +1624,6 @@ def from_date_to_date_history_excel(request):
 
         for obj in qs:
 
-            # date break
             if obj.date != current_date:
                 ws.append([
                     '', 'Total', '', '',
@@ -1572,6 +1641,7 @@ def from_date_to_date_history_excel(request):
                     totals['sp_fees'],
                     totals['nss_fees'],
                     totals['dev_fees'],
+                    totals['red_cross_fees'],   # ✅ added
                 ])
 
                 ws.append([])
@@ -1579,13 +1649,11 @@ def from_date_to_date_history_excel(request):
                 totals = {k: 0 for k in FIELDS}
                 current_date = obj.date
 
-            # accumulate
             for key in FIELDS:
                 value = getattr(obj, key) or 0
                 totals[key] += value
-                grand_totals[key] += value   # ✅ GRAND TOTAL
+                grand_totals[key] += value
 
-            # normal row
             ws.append([
                 obj.date,
                 obj.fees_receipt_no,
@@ -1605,9 +1673,9 @@ def from_date_to_date_history_excel(request):
                 obj.sp_fees,
                 obj.nss_fees,
                 obj.dev_fees,
+                obj.red_cross_fees,   # ✅ added
             ])
 
-        # last daily total
         ws.append([
             '', 'Total', '', '',
             totals['total_fees'],
@@ -1624,12 +1692,11 @@ def from_date_to_date_history_excel(request):
             totals['sp_fees'],
             totals['nss_fees'],
             totals['dev_fees'],
+            totals['red_cross_fees'],   # ✅ added
         ])
 
-    # ✅ EMPTY ROW
     ws.append([])
 
-    # ✅ GRAND TOTAL ROW
     ws.append([
         'GRAND TOTAL', '', '', '',
         grand_totals['total_fees'],
@@ -1646,20 +1713,19 @@ def from_date_to_date_history_excel(request):
         grand_totals['sp_fees'],
         grand_totals['nss_fees'],
         grand_totals['dev_fees'],
+        grand_totals['red_cross_fees'],   # ✅ added
     ])
 
     response = HttpResponse(
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
+
     timestamp = datetime.now().strftime("%d-%m-%Y---%H-%M-%S")
-
     filename = f"from_date_to_date__{timestamp}.xlsx"
-
     response['Content-Disposition'] = f'attachment; filename={filename}'
 
     wb.save(response)
     return response
-
 
 
 
