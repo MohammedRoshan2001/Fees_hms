@@ -187,36 +187,49 @@
 
       </tbody>
     </table>
-
-    <!-- ✅ PAGINATION WITH FILTERS -->
     <div class="pagination mt-3">
 
-      {% with request.GET.urlencode as query %}
-
       {% if page_obj.has_previous %}
-        <a href="?page=1&{{ query }}" class="btn btn-sm btn-outline-primary">First</a>
-        <a href="?page={{ page_obj.previous_page_number }}&{{ query }}" class="btn btn-sm btn-outline-primary">Previous</a>
+          <a href="?page=1{% if query_params %}&{{ query_params }}{% endif %}"
+             class="btn btn-sm btn-outline-primary">First</a>
+  
+          <a href="?page={{ page_obj.previous_page_number }}{% if query_params %}&{{ query_params }}{% endif %}"
+             class="btn btn-sm btn-outline-primary">Previous</a>
       {% endif %}
-
+  
       <span class="mx-2">
-        Page <b>{{ page_obj.number }}</b> of <b>{{ page_obj.paginator.num_pages }}</b>
+          Page <b>{{ page_obj.number }}</b> of <b>{{ page_obj.paginator.num_pages }}</b>
       </span>
-
+  
       {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}&{{ query }}" class="btn btn-sm btn-outline-primary">Next</a>
-        <a href="?page={{ page_obj.paginator.num_pages }}&{{ query }}" class="btn btn-sm btn-outline-primary">Last</a>
+          <a href="?page={{ page_obj.next_page_number }}{% if query_params %}&{{ query_params }}{% endif %}"
+             class="btn btn-sm btn-outline-primary">Next</a>
+  
+          <a href="?page={{ page_obj.paginator.num_pages }}{% if query_params %}&{{ query_params }}{% endif %}"
+             class="btn btn-sm btn-outline-primary">Last</a>
       {% endif %}
+  
+  </div>
+  
+<!-- RANGE -->
 
-      {% endwith %}
+<div class="mt-2">
 
-    </div>
-
-    <!-- ✅ RANGE DISPLAY -->
-    <div class="mt-2">
-      Showing <b>{{ page_obj.start_index }}</b> to <b>{{ page_obj.end_index }}</b>
-      of <b>{{ page_obj.paginator.count }}</b> records
-    </div>
-
+  Showing
+  
+  <b>{{ page_obj.start_index }}</b>
+  
+  to
+  
+  <b>{{ page_obj.end_index }}</b>
+  
+  of
+  
+  <b>{{ page_obj.paginator.count }}</b>
+  
+  records
+  
+  
   </div>
 
   {% else %}

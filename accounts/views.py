@@ -206,8 +206,12 @@ def fees_updation(request):
             )
         ]
         student_list.append(Fees_Collection(i, history))
+    params = request.GET.copy()
+    params.pop('page', None)
+
 
     context = {
+        'query_params': params.urlencode(),
         'student_list': student_list,
         'page_obj': page_obj,
         'year_list': Academic_Year.objects.all().order_by('-academic_year'),
@@ -376,109 +380,204 @@ def export_fees_excel(request):
 
     wb.save(response)
     return response
-
 @login_required
 def fees_updation_summary(request):
 
-    # ✅ GET instead of POST (pagination friendly)
+    # FILTER VALUES
     dept = request.GET.get('dept') or "---"
     year = request.GET.get('year') or "---"
     academic_year = request.GET.get('academic_year') or "---"
     reg_no = (request.GET.get('reg_no') or "").strip().upper()
+
     bal = request.GET.get('bal')
     is_lateral = request.GET.get('is_lateral') == '1'
     is_snq = request.GET.get('is_snq') == '1'
     display_alphabetically = request.GET.get('display_alphabetically') == '1'
 
+
     year_filter = -1 if year == "---" else int(year)
 
-    # ✅ BASE QUERY (optimized)
+
+    # BASE QUERY
     fees_qs = Fees_Details.objects.select_related(
-        'student', 'academic_year'
+        'student',
+        'academic_year'
     ).filter(
-        student__cancel_admission=False,is_detained=False
+        student__cancel_admission=False,
+        is_detained=False
     ).exclude(year=0)
 
-    # ✅ FILTERS
+
+    # FILTERS
+
     if dept != "---":
-        fees_qs = fees_qs.filter(student__dep=dept)
+        fees_qs = fees_qs.filter(
+            student__dep=dept
+        )
+
 
     if year_filter != -1:
-        fees_qs = fees_qs.filter(year=year_filter)
+        fees_qs = fees_qs.filter(
+            year=year_filter
+        )
+
 
     if academic_year != "---":
-        fees_qs = fees_qs.filter(academic_year__academic_year=academic_year)
+        fees_qs = fees_qs.filter(
+            academic_year__academic_year=academic_year
+        )
+
 
     if reg_no:
-        fees_qs = fees_qs.filter(student__roll_no2__iexact=reg_no)
+        fees_qs = fees_qs.filter(
+            student__roll_no2__iexact=reg_no
+        )
+
 
     if bal:
-        fees_qs = fees_qs.filter(balance__gt=0)
+        fees_qs = fees_qs.filter(
+            balance__gt=0
+        )
+
 
     if is_lateral:
-        fees_qs = fees_qs.filter(student__Is_lateral=True)
+        fees_qs = fees_qs.filter(
+            student__Is_lateral=True
+        )
+
 
     if is_snq:
-        fees_qs = fees_qs.filter(student__category='SNQ')
+        fees_qs = fees_qs.filter(
+            student__category='SNQ'
+        )
 
-    # ✅ ORDERING
+
+    # ORDERING
+
     if display_alphabetically:
-        fees_qs = fees_qs.order_by('student__name')
+        fees_qs = fees_qs.order_by(
+            'student__name'
+        )
     else:
-        fees_qs = fees_qs.order_by('-id')
+        fees_qs = fees_qs.order_by(
+            '-id'
+        )
 
-    # ✅ TOTALS (DB LEVEL 🔥)
+
+    # TOTALS
+
     totals = fees_qs.aggregate(
         total=Sum('total_fees'),
         collection=Sum('collection'),
         balance=Sum('balance')
     )
 
-    # ✅ PAGINATION (DB slicing 🔥)
-    paginator = Paginator(fees_qs, 50)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
 
-    # ✅ PREFETCH HISTORY (no N+1)
-    history_qs = History.objects.all()
-    page_obj.object_list = page_obj.object_list.prefetch_related(
-        Prefetch('student__history_set', queryset=history_qs)
+    # PAGINATION
+
+    paginator = Paginator(
+        fees_qs,
+        50
     )
 
+    page_number = request.GET.get('page')
+
+    page_obj = paginator.get_page(page_number)
+
+
+
+    # PREFETCH HISTORY
+
+    history_qs = History.objects.all()
+
+    page_obj.object_list = page_obj.object_list.prefetch_related(
+        Prefetch(
+            'student__history_set',
+            queryset=history_qs
+        )
+    )
+
+
     student_list = []
+
     for i in page_obj:
+
         history = [
-            Collection(j.fees_receipt_no, j.date, j.total_fees)
+            Collection(
+                j.fees_receipt_no,
+                j.date,
+                j.total_fees
+            )
             for j in i.student.history_set.all()
             if j.year == i.year
         ]
-        student_list.append(Fees_Collection(i, history))
+
+        student_list.append(
+            Fees_Collection(
+                i,
+                history
+            )
+        )
+
+
+    # REMOVE PAGE FROM QUERY PARAMS
+
+    params = request.GET.copy()
+
+    if 'page' in params:
+        params.pop('page')
+
 
     context = {
+
         'student_list': student_list,
+
         'page_obj': page_obj,
-        'year_list': Academic_Year.objects.all().order_by('-academic_year'),
+
+        'query_params': params.urlencode(),
+
+
+        'year_list': Academic_Year.objects.all()
+            .order_by('-academic_year'),
+
         'dep_list': department_choices,
 
-        # totals
+
+        # TOTALS
+
         'total': totals['total'] or 0,
+
         'collection': totals['collection'] or 0,
+
         'balance': totals['balance'] or 0,
 
-        # filters
+
+        # FILTER VALUES
+
         'dept': dept,
+
         'year': year,
+
         'academic_year': academic_year,
+
         'reg_no': reg_no,
+
         'only_balance': bal,
+
         'is_lateral': is_lateral,
+
         'is_snq': is_snq,
+
         'display_alphabetically': display_alphabetically,
+
     }
 
-    return render(request, 'fees_updation_summary.html', context)
-    
-    pass
+
+    return render(
+        request,
+        'fees_updation_summary.html',
+        context
+    )
 
 @login_required
 def export_fees_excel(request):
@@ -776,51 +875,52 @@ FIELDS = [
     'lab_fees','sp_fees','nss_fees','dev_fees','red_cross_fees','total_fees'
 ]
 
-from django.core.paginator import Paginator
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-
 @login_required
 def day_history(request):
 
-    from_date = request.POST.get('from_date')
-    to_date = request.POST.get('to_date')
+    # Get filter values from URL
+    from_date = request.GET.get('from_date', '')
+    to_date = request.GET.get('to_date', '')
 
     qs = History.objects.all().order_by('date', 'fees_receipt_no')
 
-    # ✅ Filter
+    # Filter
     if from_date and to_date:
         qs = qs.filter(date__range=[from_date, to_date])
 
-    # =========================
-    # ✅ GRAND TOTAL (FULL DATA)
-    # =========================
     FIELDS = [
-        'tution_fees','admission_fees','id_fees','management_fees',
-        'lib_fees','assn_fees','rr_fees','swf_fees','twf_fees',
-        'lab_fees','sp_fees','nss_fees','dev_fees',
-        'red_cross_fees',   # ✅ added
+        'tution_fees',
+        'admission_fees',
+        'id_fees',
+        'management_fees',
+        'lib_fees',
+        'assn_fees',
+        'rr_fees',
+        'swf_fees',
+        'twf_fees',
+        'lab_fees',
+        'sp_fees',
+        'nss_fees',
+        'dev_fees',
+        'red_cross_fees',
         'total_fees'
     ]
 
+    # Grand Total
     grand_totals = {k: 0 for k in FIELDS}
 
     for obj in qs:
         for key in FIELDS:
             grand_totals[key] += getattr(obj, key) or 0
 
-    # =========================
-    # ✅ PAGINATION
-    # =========================
+    # Pagination
     paginator = Paginator(qs, 300)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     page_list = list(page_obj)
 
-    # =========================
-    # ✅ GROUPING (BY DATE)
-    # =========================
+    # Group by Date
     final_list = []
 
     if page_list:
@@ -832,47 +932,50 @@ def day_history(request):
 
         for obj in page_list:
 
-            # 👉 DATE CHANGE
             if obj.date != current_date:
-                final_list.append(History(
-                    fees_receipt_no=f"{min_fees_no}-{max_fees_no}",
-                    date=current_date,
-                    **totals
-                ))
 
-                # reset
+                final_list.append(
+                    History(
+                        fees_receipt_no=f"{min_fees_no}-{max_fees_no}",
+                        date=current_date,
+                        **totals
+                    )
+                )
+
                 min_fees_no = obj.fees_receipt_no
                 max_fees_no = obj.fees_receipt_no
-                totals = {k: 0 for k in FIELDS}
                 current_date = obj.date
+                totals = {k: 0 for k in FIELDS}
 
             else:
                 max_fees_no = obj.fees_receipt_no
 
-            # accumulate
             for key in FIELDS:
                 totals[key] += getattr(obj, key) or 0
 
-        # 👉 LAST GROUP
-        final_list.append(History(
-            fees_receipt_no=f"{min_fees_no}-{max_fees_no}",
-            date=current_date,
-            **totals
-        ))
+        # Last group
+        final_list.append(
+            History(
+                fees_receipt_no=f"{min_fees_no}-{max_fees_no}",
+                date=current_date,
+                **totals
+            )
+        )
 
-    # =========================
-    # ✅ CONTEXT
-    # =========================
+    # Preserve filters during pagination
+    params = request.GET.copy()
+    params.pop("page", None)
+
     context = {
-        'day_list': final_list,
-        'page_obj': page_obj,
-        'from_date': from_date or '',
-        'to_date': to_date or '',
-        'grand_totals': grand_totals
+        "day_list": final_list,
+        "page_obj": page_obj,
+        "from_date": from_date,
+        "to_date": to_date,
+        "grand_totals": grand_totals,
+        "query_params": params.urlencode(),
     }
 
-    return render(request, 'day_history.html', context)
-
+    return render(request, "day_history.html", context)
 # =========================
 # ✅ DAY HISTORY VIEW
 # =========================
@@ -1311,8 +1414,10 @@ def history(request):
             **totals
         ))
         day_list2.append(empty_row())
-
+    params = request.GET.copy()
+    params.pop('page', None)
     context = {
+        'query_params': params.urlencode(),
         'day_list': day_list2,
         'page_obj': page_obj,
         'year_list': Academic_Year.objects.all().order_by('-academic_year'),
@@ -1517,29 +1622,35 @@ def export_history_excel(request):
 @login_required
 def from_date_to_date_history(request):
 
-    from_date = None
-    to_date = None
+    history_qs = History.objects.select_related('student').order_by(
+        'date', 'fees_receipt_no'
+    )
 
-    history_qs = History.objects.select_related('student').order_by('date', 'fees_receipt_no')
+    # Get values from GET request
+    from_date = request.GET.get('from_date', '')
+    to_date = request.GET.get('to_date', '')
 
-    if request.method == 'POST':
-        from_date_str = request.POST.get('from_date')
-        to_date_str = request.POST.get('to_date')
+    # Apply filter
+    if from_date and to_date:
+        try:
+            from_date_obj = datetime.strptime(from_date, "%Y-%m-%d").date()
+            to_date_obj = datetime.strptime(to_date, "%Y-%m-%d").date()
 
-        if from_date_str and to_date_str:
-            from_date = datetime.strptime(from_date_str, "%Y-%m-%d").date()
-            to_date = datetime.strptime(to_date_str, "%Y-%m-%d").date()
+            history_qs = history_qs.filter(
+                date__range=[from_date_obj, to_date_obj]
+            )
+        except ValueError:
+            from_date = ''
+            to_date = ''
 
-            history_qs = history_qs.filter(date__range=[from_date, to_date])
-
-    # ✅ GRAND TOTAL
+    # GRAND TOTAL
     grand_totals = {k: 0 for k in FIELDS}
 
     for obj in history_qs:
         for key in FIELDS:
             grand_totals[key] += getattr(obj, key) or 0
 
-    # ✅ PAGINATION
+    # PAGINATION
     paginator = Paginator(history_qs, 50)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -1555,12 +1666,14 @@ def from_date_to_date_history(request):
         for obj in page_list:
 
             if obj.date != current_date:
-                final_list.append(History(
-                    fees_receipt_no='Total',
-                    student=None,
-                    date='',
-                    **totals
-                ))
+                final_list.append(
+                    History(
+                        fees_receipt_no='Total',
+                        student=None,
+                        date='',
+                        **totals
+                    )
+                )
 
                 final_list.append(empty_row())
 
@@ -1572,21 +1685,22 @@ def from_date_to_date_history(request):
 
             final_list.append(obj)
 
-        final_list.append(History(
-            fees_receipt_no='Total',
-            student=None,
-            date='',
-            **totals
-        ))
+        final_list.append(
+            History(
+                fees_receipt_no='Total',
+                student=None,
+                date='',
+                **totals
+            )
+        )
 
     context = {
         'day_list': final_list,
         'page_obj': page_obj,
-        'from_date': request.POST.get('from_date', ''),
-        'to_date': request.POST.get('to_date', ''),
-        'grand_totals': grand_totals
+        'from_date': from_date,
+        'to_date': to_date,
+        'grand_totals': grand_totals,
     }
-    print(grand_totals)
 
     return render(request, 'from_date_to_date_history.html', context)
 # =========================
@@ -1809,12 +1923,15 @@ def admission_order(request):
             'student_list':student_list,
             'total': len(student_list)
         }
+        st=Student.objects.get(roll_no='2627CE057')
+        print(st.admission_year,st.roll_no2)
         return render(request, 'admission_order.html', context)
     else:
         context={
             
         }
         return render(request, 'admission_order.html', context)
+        
 
 
 def print_order(request,roll_no):
@@ -1937,30 +2054,40 @@ def cancelled_admissions(request):
 
 @login_required
 def student_details(request):
+
     academic_year_id = request.GET.get('academic_year')
 
-    students_qs = Student.objects.all().select_related()
+    students_qs = Student.objects.all()
 
     academic_year = None
 
     if academic_year_id:
         try:
             academic_year = Academic_Year.objects.get(pk=academic_year_id)
+
             students_qs = students_qs.filter(
                 fees_details__academic_year=academic_year
             ).distinct()
+
         except Academic_Year.DoesNotExist:
             students_qs = Student.objects.none()
 
-    # 🔥 Pagination (DB-level slicing happens here)
-    paginator = Paginator(students_qs, 50)  # 50 per page
+
+    # Pagination
+    paginator = Paginator(students_qs, 50)
+
     page_number = request.GET.get('page')
+
     page_obj = paginator.get_page(page_number)
+
 
     academic_years = Academic_Year.objects.all().order_by('-academic_year')
 
+
     student_details = []
+
     for student in page_obj:
+
         fee_detail = Fees_Details.objects.filter(
             student=student,
             academic_year=academic_year
@@ -1971,11 +2098,20 @@ def student_details(request):
             'year': fee_detail.year if fee_detail else None,
         })
 
+
+    # Remove page parameter for pagination links
+    params = request.GET.copy()
+
+    if 'page' in params:
+        params.pop('page')
+
+
     context = {
         'academic_years': academic_years,
         'students': student_details,
         'page_obj': page_obj,
         'academic_year': academic_year_id,
+        'query_params': params.urlencode(),
     }
 
     return render(request, 'student_details.html', context)
