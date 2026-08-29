@@ -236,12 +236,12 @@
                 {% if hist.gender == 'M' %}
                 <p>
                     Mr. {{ hist.name }} S/O {{ hist.parent_name }}
-                    is allotted Diploma Seat for the 1st Year.
+                    is allotted Diploma Seat for the {% if hist.Is_lateral == True %} 2nd {%else%} 1st {%endif%}Year.
                 </p>
                 {% else %}
                 <p>
                     Mrs. {{ hist.name }} D/O {{ hist.parent_name }}
-                    is allotted Diploma Seat for the 1st Year.
+                    is allotted Diploma Seat for the {% if hist.Is_lateral == True %} 2nd {%else%} 1st {%endif%}Year.
                 </p>
                 {% endif %}
 

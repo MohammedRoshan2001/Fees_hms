@@ -1940,10 +1940,11 @@ def print_order(request,roll_no):
     print(curr_academic_year)
     curr_academic_year = curr_academic_year[0].academic_year
     context={}
-    
+    temp=None
     for i in hist.history_set.all():
         temp=i
         break
+    
     context={
         'hist':hist,
         'fees_receipt':temp,
